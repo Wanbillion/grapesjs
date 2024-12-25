@@ -56,9 +56,9 @@ import { ConditionalVariableType, DataCondition } from '../../data_sources/model
 import { isDynamicValue, isDynamicValueDefinition } from '../../data_sources/model/utils';
 import { DynamicValueDefinition } from '../../data_sources/types';
 
-export interface IComponent extends ExtractMethods<Component> { }
+export interface IComponent extends ExtractMethods<Component> {}
 
-export interface SetAttrOptions extends SetOptions, UpdateStyleOptions { }
+export interface SetAttrOptions extends SetOptions, UpdateStyleOptions {}
 
 const escapeRegExp = (str: string) => {
   return str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
@@ -225,12 +225,12 @@ export default class Component extends StyleableModel<ComponentProperties> {
     return this.frame?.getPage();
   }
 
-  preInit() { }
+  preInit() {}
 
   /**
    * Hook method, called once the model is created
    */
-  init() { }
+  init() {}
 
   /**
    * Hook method, called when the model has been updated (eg. updated some model's property)
@@ -238,12 +238,12 @@ export default class Component extends StyleableModel<ComponentProperties> {
    * @param {*} value Property value, if triggered after some property update
    * @param {*} previous Property previous value, if triggered after some property update
    */
-  updated(property: string, value: any, previous: any) { }
+  updated(property: string, value: any, previous: any) {}
 
   /**
    * Hook method, called once the model has been removed
    */
-  removed() { }
+  removed() {}
 
   em!: EditorModel;
   opt!: ComponentOptions;
@@ -263,22 +263,22 @@ export default class Component extends StyleableModel<ComponentProperties> {
 
   constructor(props: ComponentProperties = {}, opt: ComponentOptions) {
     if (Array.isArray(props['components'])) {
-      props['components']?.map(component => {
+      props['components']?.map((component) => {
         return {
           ...component,
           collectionsItems: {
-            ...props.componentCollectionKey
-          }
-        }
-      })
+            ...props.componentCollectionKey,
+          },
+        };
+      });
     } else if (typeof props['components'] === 'object') {
       props['components'] = {
         ...props['components'],
         // @ts-ignore
         collectionsItems: {
-          ...props.componentCollectionKey
-        }
-      }
+          ...props.componentCollectionKey,
+        },
+      };
     }
 
     super(props, opt);

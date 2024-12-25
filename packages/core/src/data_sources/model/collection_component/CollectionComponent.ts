@@ -1,4 +1,4 @@
-import { DataVariableType } from './../DataVariable';
+import { DataVariableDefinition, DataVariableType } from './../DataVariable';
 import { isArray } from 'underscore';
 import Component from '../../../dom_components/model/Component';
 import { ComponentDefinition, ComponentOptions, ComponentProperties } from '../../../dom_components/model/types';
@@ -16,16 +16,13 @@ type CollectionVariable = {
   path?: string;
 };
 
-type CollectionDataSource =
-  | any[]
-  | { type: typeof DataVariableType; path: string }
-  | CollectionVariable;
+type CollectionDataSource = any[] | DataVariableDefinition | CollectionVariable;
 
 type CollectionConfig = {
   start_index?: number;
   end_index?: number | ConditionDefinition;
   dataSource: CollectionDataSource;
-}
+};
 
 type CollectionState = {
   current_index: number;
@@ -35,18 +32,18 @@ type CollectionState = {
   collection_name?: string;
   total_items: number;
   remaining_items: number;
-}
+};
 
 type CollectionsStateMap = {
   [key: string]: CollectionState;
-}
+};
 
 type CollectionDefinition = {
   type: typeof CollectionVariableType;
   collection_name?: string;
   config: CollectionConfig;
   block: ComponentDefinition;
-}
+};
 
 export const collectionDefinitionKey = 'collectionDefinition';
 export const collectionsStateKey = 'collectionsItems';
@@ -144,13 +141,18 @@ function listDataSourceVariables(dataSource_id: string, em: EditorModel) {
   const records = em.DataSources.getValue(dataSource_id, []);
   const keys = Object.keys(records);
 
-  return keys.map(key => ({
+  return keys.map((key) => ({
     type: DataVariableType,
     path: dataSource_id + '.' + key,
   }));
 }
 
-function resolveComponent(symbol: Component, block: ComponentDefinition, collectionsStateMap: CollectionsStateMap, em: EditorModel) {
+function resolveComponent(
+  symbol: Component,
+  block: ComponentDefinition,
+  collectionsStateMap: CollectionsStateMap,
+  em: EditorModel,
+) {
   const instance = em.Components.addSymbol(symbol);
   const { resolvedCollectionValues: overrideKeys } = resolveBlockValues(collectionsStateMap, block);
   Object.keys(overrideKeys).length && instance!.setSymbolOverride(Object.keys(overrideKeys));
@@ -166,7 +168,7 @@ function resolveComponent(symbol: Component, block: ComponentDefinition, collect
   const componentJSON = instance!.toJSON();
   const componentDefinition: ComponentDefinition = {
     ...componentJSON,
-    components: children
+    components: children,
   };
 
   return componentDefinition;
@@ -189,33 +191,35 @@ function resolveBlockValues(collectionsStateMap: CollectionsStateMap, block: Obj
           const {
             variable_type,
             collection_name = 'innerMostCollectionItem',
-            path = ''
+            path = '',
           } = blockValue as CollectionVariable;
           const collectionItem = collectionsStateMap[collection_name];
           if (!collectionItem) {
-            throw new Error(
-              `Collection not found: ${collection_name}`
-            );
+            throw new Error(`Collection not found: ${collection_name}`);
           }
           if (!variable_type) {
-            throw new Error(
-              `Missing collection variable type for collection: ${collection_name}`
-            );
+            throw new Error(`Missing collection variable type for collection: ${collection_name}`);
           }
           clonedBlock[key] = resolveCurrentItem(variable_type, collectionItem, path);
 
           hasCollectionVariable = true;
         } else if (Array.isArray(blockValue)) {
           clonedBlock[key] = blockValue.map((arrayItem: any) => {
-            const { clonedBlock, resolvedCollectionValues: itemOverrideKeys } = resolveBlockValues(collectionsStateMap, arrayItem)
+            const { clonedBlock, resolvedCollectionValues: itemOverrideKeys } = resolveBlockValues(
+              collectionsStateMap,
+              arrayItem,
+            );
             if (!isEmptyObject(itemOverrideKeys)) {
               hasCollectionVariable = true;
             }
 
-            return typeof arrayItem === 'object' ? clonedBlock : arrayItem
+            return typeof arrayItem === 'object' ? clonedBlock : arrayItem;
           });
         } else {
-          const { clonedBlock, resolvedCollectionValues: itemOverrideKeys } = resolveBlockValues(collectionsStateMap, blockValue);
+          const { clonedBlock, resolvedCollectionValues: itemOverrideKeys } = resolveBlockValues(
+            collectionsStateMap,
+            blockValue,
+          );
           clonedBlock[key] = clonedBlock;
 
           if (!isEmptyObject(itemOverrideKeys)) {
@@ -224,7 +228,7 @@ function resolveBlockValues(collectionsStateMap: CollectionsStateMap, block: Obj
         }
 
         if (hasCollectionVariable && key !== 'components') {
-          resolvedCollectionValues[key] = clonedBlock[key]
+          resolvedCollectionValues[key] = clonedBlock[key];
         }
       }
     }
@@ -233,12 +237,15 @@ function resolveBlockValues(collectionsStateMap: CollectionsStateMap, block: Obj
   return { clonedBlock, resolvedCollectionValues };
 }
 
-function resolveCurrentItem(variableType: CollectionVariable['variable_type'], collectionItem: CollectionState, path: string) {
+function resolveCurrentItem(
+  variableType: CollectionVariable['variable_type'],
+  collectionItem: CollectionState,
+  path: string,
+) {
   const valueIsDataVariable = collectionItem.current_item?.type === DataVariableType;
   if (variableType === 'current_item' && valueIsDataVariable) {
-    const resolvedPath = collectionItem.current_item.path
-      ? `${collectionItem.current_item.path}.${path}`
-      : path;
+    const currentItem_path = collectionItem.current_item.path;
+    const resolvedPath = currentItem_path ? `${currentItem_path}.${path}` : path;
     return {
       ...collectionItem.current_item,
       path: resolvedPath,
@@ -246,7 +253,6 @@ function resolveCurrentItem(variableType: CollectionVariable['variable_type'], c
   }
   return collectionItem[variableType];
 }
-
 
 function isEmptyObject(itemOverrideKeys: ObjectAny) {
   return Object.keys(itemOverrideKeys).length === 0;
