@@ -48,7 +48,7 @@ type CollectionDefinition = {
 };
 
 export const collectionDefinitionKey = 'collectionDefinition';
-export const collectionsStateKey = 'collectionsItems';
+export const collectionsStateMapKey = 'collectionsItems';
 export const innerCollectionStateKey = 'innerCollectionState';
 
 export default class CollectionComponent extends Component {
@@ -83,7 +83,7 @@ export default class CollectionComponent extends Component {
       };
 
       const collectionsStateMap: CollectionsStateMap = {
-        ...props[collectionDefinitionKey],
+        ...props[collectionsStateMapKey],
         ...(collection_name && { [collection_name]: collectionState }),
         [innerCollectionStateKey]: collectionState,
       };
@@ -171,6 +171,7 @@ function resolveComponent(
   const componentDefinition: ComponentDefinition = {
     ...componentJSON,
     components: children,
+    [collectionsStateMapKey]: collectionsStateMap
   };
 
   return componentDefinition;

@@ -262,25 +262,6 @@ export default class Component extends StyleableModel<ComponentProperties> {
   collection!: Components;
 
   constructor(props: ComponentProperties = {}, opt: ComponentOptions) {
-    if (Array.isArray(props['components'])) {
-      props['components']?.map((component) => {
-        return {
-          ...component,
-          collectionsItems: {
-            ...props.componentCollectionKey,
-          },
-        };
-      });
-    } else if (typeof props['components'] === 'object') {
-      props['components'] = {
-        ...props['components'],
-        // @ts-ignore
-        collectionsItems: {
-          ...props.componentCollectionKey,
-        },
-      };
-    }
-
     super(props, opt);
     bindAll(this, '__upSymbProps', '__upSymbCls', '__upSymbComps');
     const em = opt.em;
