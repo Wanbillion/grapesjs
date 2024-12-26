@@ -19,13 +19,13 @@ export class ComponentDynamicValueWatcher {
 
   private createPropertyUpdater() {
     return (key: string, value: any) => {
-      this.component.set(key, value, { skipWatcherUpdates: false, avoidStore: true });
+      this.component.set(key, value, { skipWatcherUpdates: true, avoidStore: true });
     };
   }
 
   private createAttributeUpdater() {
     return (key: string, value: any) => {
-      this.component.addAttributes({ [key]: value }, { skipWatcherUpdates: false });
+      this.component.addAttributes({ [key]: value }, { skipWatcherUpdates: true, avoidStore: true });
     };
   }
 
@@ -64,14 +64,13 @@ export class ComponentDynamicValueWatcher {
   }
 
   watchComponentDef(values: ObjectAny) {
-    this.watchProps(values);
-    this.watchAttributes(values.attributes);
-    this.watchTraits(values.traits);
+    this.addProps(values);
+    this.addAttributes(values.attributes);
+    this.addTraits(values.traits);
   }
 
-  watchProps(props: ObjectAny) {
-    this.propertyWatcher.removeListeners(Object.keys(props));
-    this.propertyWatcher.watchDynamicValue(props);
+  addProps(props: ObjectAny) {
+    this.propertyWatcher.addDynamicValues(props);
   }
 
   getDynamicPropsDefs() {
@@ -79,15 +78,14 @@ export class ComponentDynamicValueWatcher {
   }
 
   setAttributes(attributes: ObjectAny) {
-    this.attributeWatcher.removeListeners();
-    this.attributeWatcher.watchDynamicValue(attributes);
+    this.attributeWatcher.setDynamicValues(attributes);
   }
 
-  watchAttributes(attributes: ObjectAny) {
-    this.attributeWatcher.watchDynamicValue(attributes);
+  addAttributes(attributes: ObjectAny) {
+    this.attributeWatcher.addDynamicValues(attributes);
   }
 
-  watchTraits(traits: (string | ObjectAny)[]) {
+  addTraits(traits: (string | ObjectAny)[]) {
     const evaluatedTraits: { [key: string]: ObjectAny } = {};
 
     traits?.forEach((trait: any) => {
@@ -96,7 +94,7 @@ export class ComponentDynamicValueWatcher {
       }
     });
 
-    this.traitsWatcher.watchDynamicValue(evaluatedTraits);
+    this.traitsWatcher.addDynamicValues(evaluatedTraits);
   }
 
   removeAttributes(attributes: string[]) {
