@@ -25,14 +25,17 @@
  * @module Parser
  */
 import { Module } from '../abstract';
+import { ObjectAny } from '../common';
 import EditorModel from '../editor/model/Editor';
 import defConfig, { HTMLParserOptions, ParserConfig } from './config/config';
 import ParserCss from './model/ParserCss';
 import ParserHtml from './model/ParserHtml';
+import { ParserEvents } from './types';
 
 export default class ParserModule extends Module<ParserConfig & { name?: string }> {
   parserHtml: ReturnType<typeof ParserHtml>;
   parserCss: ReturnType<typeof ParserCss>;
+  events = ParserEvents;
 
   constructor(em: EditorModel) {
     super(em, 'Parser', defConfig());
@@ -83,6 +86,12 @@ export default class ParserModule extends Module<ParserConfig & { name?: string 
    */
   parseCss(input: string) {
     return this.parserCss.parse(input);
+  }
+
+  __emitEvent(event: string, data: ObjectAny) {
+    const { em, events } = this;
+    em.trigger(event, data);
+    em.trigger(events.all, { event, ...data });
   }
 
   destroy() {}
