@@ -54,12 +54,12 @@ import {
 import { ComponentDynamicValueListener } from './ComponentDynamicValueListener';
 import { DynamicValueWatcher } from './DynamicValueWatcher';
 
-export interface IComponent extends ExtractMethods<Component> { }
+export interface IComponent extends ExtractMethods<Component> {}
 export interface DynamicWatchersOptions {
   skipWatcherUpdates?: boolean;
 }
-export interface SetAttrOptions extends SetOptions, UpdateStyleOptions, DynamicWatchersOptions { }
-export interface ComponentSetOptions extends SetOptions, DynamicWatchersOptions { }
+export interface SetAttrOptions extends SetOptions, UpdateStyleOptions, DynamicWatchersOptions {}
+export interface ComponentSetOptions extends SetOptions, DynamicWatchersOptions {}
 
 const escapeRegExp = (str: string) => {
   return str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
@@ -226,12 +226,12 @@ export default class Component extends StyleableModel<ComponentProperties> {
     return this.frame?.getPage();
   }
 
-  preInit() { }
+  preInit() {}
 
   /**
    * Hook method, called once the model is created
    */
-  init() { }
+  init() {}
 
   /**
    * Hook method, called when the model has been updated (eg. updated some model's property)
@@ -239,12 +239,12 @@ export default class Component extends StyleableModel<ComponentProperties> {
    * @param {*} value Property value, if triggered after some property update
    * @param {*} previous Property previous value, if triggered after some property update
    */
-  updated(property: string, value: any, previous: any) { }
+  updated(property: string, value: any, previous: any) {}
 
   /**
    * Hook method, called once the model has been removed
    */
-  removed() { }
+  removed() {}
 
   em!: EditorModel;
   opt!: ComponentOptions;
@@ -340,13 +340,13 @@ export default class Component extends StyleableModel<ComponentProperties> {
   set<A extends string>(
     keyOrAttributes: A | Partial<ComponentProperties>,
     valueOrOptions?: ComponentProperties[A] | ComponentSetOptions,
-    optionsOrUndefined?: ComponentSetOptions
+    optionsOrUndefined?: ComponentSetOptions,
   ): this {
     let attributes: Partial<ComponentProperties>;
     let options: ComponentSetOptions = { skipWatcherUpdates: false };
     if (typeof keyOrAttributes === 'object') {
       attributes = keyOrAttributes;
-      options = valueOrOptions || options as ComponentSetOptions;
+      options = valueOrOptions || (options as ComponentSetOptions);
     } else if (typeof keyOrAttributes === 'string') {
       attributes = { [keyOrAttributes as string]: valueOrOptions };
       options = optionsOrUndefined || options;
