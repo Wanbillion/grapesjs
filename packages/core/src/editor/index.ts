@@ -91,6 +91,7 @@ import UtilsModule from '../utils';
 import html from '../utils/html';
 import defConfig, { EditorConfig, EditorConfigKeys } from './config/config';
 import EditorModel, { EditorLoadOptions } from './model/Editor';
+import { EditorEvents } from './types';
 import EditorView from './view/EditorView';
 
 export type ParsedRule = {
@@ -130,6 +131,7 @@ export default class Editor implements IBaseModule<EditorConfig> {
   $: any;
   em: EditorModel;
   config: EditorConfigType;
+  events = EditorEvents;
 
   constructor(config: EditorConfig = {}, opts: any = {}) {
     const defaults = defConfig();
