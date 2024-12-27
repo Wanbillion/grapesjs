@@ -958,7 +958,7 @@ export default class Component extends StyleableModel<ComponentProperties> {
     const event = 'change:traits';
     this.off(event, this.initTraits);
     this.__loadTraits();
-    const attrs: { [key: string]: string | DynamicValueDefinition } = {};
+    const attrs = { ...this.get('attributes') };
     const traits = this.traits;
     traits.each((trait) => {
       const name = trait.getName();
@@ -970,7 +970,11 @@ export default class Component extends StyleableModel<ComponentProperties> {
         if (name && value) attrs[name] = value;
       }
     });
-    traits.length && this.addAttributes(attrs);
+    const dynamicAttributes = this.componentDVListener.getDynamicAttributesDefs();
+    traits.length && this.setAttributes({
+      ...attrs,
+      ...dynamicAttributes,
+    });
     this.on(event, this.initTraits);
     changed && em && em.trigger('component:toggled');
     return this;
