@@ -13,57 +13,15 @@ import { keyCollectionDefinition, keyInnerCollectionState, CollectionComponentTy
 export default class CollectionComponent extends Component {
   constructor(props: CollectionComponentDefinition, opt: ComponentOptions) {
     const em = opt.em;
-    const { collection_name, block, config } = props[keyCollectionDefinition];
-    if (!block) {
-      throw new Error('The "block" property is required in the collection definition.');
-    }
+    const collectionDefinition = props[keyCollectionDefinition];
+    const parentCollectionStateMap = (props[keyCollectionsStateMap] || {}) as CollectionsStateMap;
 
-    if (!config?.dataSource) {
-      throw new Error('The "config.dataSource" property is required in the collection definition.');
-    }
-
-    let items: any[] = getDataSourceItems(config.dataSource, em);
-    const components: ComponentDefinition[] = [];
-    const start_index = Math.max(0, config.start_index || 0);
-    const end_index = Math.min(items.length - 1, config.end_index || Number.MAX_VALUE);
-
-    const total_items = end_index - start_index + 1;
-    let blockComponent: Component;
-    for (let index = start_index; index <= end_index; index++) {
-      const item = items[index];
-      const collectionState: CollectionState = {
-        collection_name,
-        current_index: index,
-        current_item: item,
-        start_index: start_index,
-        end_index: end_index,
-        total_items: total_items,
-        remaining_items: total_items - (index + 1),
-      };
-
-      const collectionsStateMap: CollectionsStateMap = {
-        ...(props[keyCollectionsStateMap] || {}),
-        ...(collection_name && { [collection_name]: collectionState }),
-        [keyInnerCollectionState]: collectionState,
-      };
-
-      if (index === start_index) {
-        // @ts-ignore
-        const type = em.Components.getType(block?.type || 'default');
-        const model = type.model;
-        blockComponent = new model(
-          {
-            ...block,
-            [keyCollectionsStateMap]: collectionsStateMap,
-          },
-          opt,
-        );
-      }
-      const instance = em.Components.addSymbol(blockComponent!);
-      const cmpDefinition = resolveComponent(instance!, block, collectionsStateMap, em);
-
-      components.push(cmpDefinition);
-    }
+    const components: ComponentDefinition[] = getCollectionItems(
+      em,
+      collectionDefinition,
+      parentCollectionStateMap,
+      opt,
+    );
 
     const conditionalCmptDef = {
       ...props,
@@ -91,6 +49,68 @@ export default class CollectionComponent extends Component {
     delete json.components;
     return json;
   }
+}
+
+function getCollectionItems(
+  em: EditorModel,
+  collectionDefinition: CollectionDefinition,
+  parentCollectionStateMap: CollectionsStateMap,
+  opt: ComponentOptions,
+) {
+  const { collection_name, block, config } = collectionDefinition;
+  if (!block) {
+    throw new Error('The "block" property is required in the collection definition.');
+  }
+
+  if (!config?.dataSource) {
+    throw new Error('The "config.dataSource" property is required in the collection definition.');
+  }
+
+  const components: ComponentDefinition[] = [];
+
+  let items: any[] = getDataSourceItems(config.dataSource, em);
+  const start_index = Math.max(0, config.start_index || 0);
+  const end_index = Math.min(items.length - 1, config.end_index || Number.MAX_VALUE);
+
+  const total_items = end_index - start_index + 1;
+  let blockComponent: Component;
+  for (let index = start_index; index <= end_index; index++) {
+    const item = items[index];
+    const collectionState: CollectionState = {
+      collection_name,
+      current_index: index,
+      current_item: item,
+      start_index: start_index,
+      end_index: end_index,
+      total_items: total_items,
+      remaining_items: total_items - (index + 1),
+    };
+
+    const collectionsStateMap: CollectionsStateMap = {
+      ...parentCollectionStateMap,
+      ...(collection_name && { [collection_name]: collectionState }),
+      [keyInnerCollectionState]: collectionState,
+    };
+
+    if (index === start_index) {
+      // @ts-ignore
+      const type = em.Components.getType(block?.type || 'default');
+      const model = type.model;
+      blockComponent = new model(
+        {
+          ...block,
+          [keyCollectionsStateMap]: collectionsStateMap,
+        },
+        opt,
+      );
+    }
+    const instance = em.Components.addSymbol(blockComponent!);
+    const cmpDefinition = resolveComponent(instance!, block, collectionsStateMap, em);
+
+    components.push(cmpDefinition);
+  }
+  
+  return components;
 }
 
 function getDataSourceItems(dataSource: any, em: EditorModel) {
