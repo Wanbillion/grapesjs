@@ -274,16 +274,16 @@ export default class Component extends StyleableModel<ComponentProperties> {
         [keyCollectionsStateMap]: props[keyCollectionsStateMap],
       }));
     }
-    super(props, {
-      ...opt,
-      // @ts-ignore
-      [keyCollectionsStateMap]: props[keyCollectionsStateMap],
-    });
-    this.componentDVListener = new ComponentDynamicValueWatcher(this, {
+    const componentDVListener = new ComponentDynamicValueWatcher(undefined, {
       em: opt.em,
       collectionsStateMap: props[keyCollectionsStateMap],
     });
-    this.componentDVListener.addProps(props);
+    super(props, {
+      ...opt,
+      // @ts-ignore
+      componentDVListener,
+    });
+    this.componentDVListener = componentDVListener;
 
     bindAll(this, '__upSymbProps', '__upSymbCls', '__upSymbComps');
     const em = opt.em;
@@ -372,14 +372,12 @@ export default class Component extends StyleableModel<ComponentProperties> {
     }
 
     // @ts-ignore
-    const em = this.em || options.em;
-    // @ts-ignore
-    const collectionsStateMap = this.get(keyCollectionsStateMap) || options[keyCollectionsStateMap];
-    const evaluatedAttributes = DynamicValueWatcher.getStaticValues(attributes, { em, collectionsStateMap });
+    const componentDVListener = this.componentDVListener || options.componentDVListener;
+    const evaluatedAttributes = componentDVListener.getStaticValues(attributes);
 
     const shouldSkipWatcherUpdates = options.skipWatcherUpdates || options.fromDataSource;
     if (!shouldSkipWatcherUpdates) {
-      this.componentDVListener?.addProps(attributes);
+      componentDVListener?.addProps(attributes);
     }
 
     return super.set(evaluatedAttributes, options);
@@ -704,13 +702,11 @@ export default class Component extends StyleableModel<ComponentProperties> {
    */
   setAttributes(attrs: ObjectAny, opts: SetAttrOptions = { skipWatcherUpdates: false, fromDataSource: false }) {
     // @ts-ignore
-    const em = this.em || opts.em;
-    // @ts-ignore
-    const collectionsStateMap = this.get(keyCollectionsStateMap) || opts[keyCollectionsStateMap];
-    const evaluatedAttributes = DynamicValueWatcher.getStaticValues(attrs, { em, collectionsStateMap });
+    const componentDVListener = this.componentDVListener || opts.componentDVListener;
+    const evaluatedAttributes = componentDVListener.getStaticValues(attrs);
     const shouldSkipWatcherUpdates = opts.skipWatcherUpdates || opts.fromDataSource;
     if (!shouldSkipWatcherUpdates) {
-      this.componentDVListener.setAttributes(attrs);
+      componentDVListener.setAttributes(attrs);
     }
     this.set('attributes', { ...evaluatedAttributes }, opts);
 

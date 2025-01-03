@@ -4,29 +4,20 @@ import DynamicVariableListenerManager from '../../data_sources/model/DataVariabl
 import { evaluateDynamicValueDefinition, isDynamicValueDefinition } from '../../data_sources/model/utils';
 import { DynamicValue } from '../../data_sources/types';
 import EditorModel from '../../editor/model/Editor';
+import Component from './Component';
 
 export class DynamicValueWatcher {
   private dynamicVariableListeners: { [key: string]: DynamicVariableListenerManager } = {};
-  private em: EditorModel;
-  private collectionsStateMap: CollectionsStateMap | undefined;
   constructor(
-    private updateFn: (key: string, value: any) => void,
-    options: {
+    private component: Component | undefined,
+    private updateFn: (component: Component | undefined, key: string, value: any) => void,
+    private options: {
       em: EditorModel;
       collectionsStateMap?: CollectionsStateMap;
     },
-  ) {
-    this.em = options.em;
-    this.collectionsStateMap = options.collectionsStateMap;
-  }
+  ) {}
 
-  static getStaticValues(
-    values: ObjectAny | undefined,
-    options: {
-      em: EditorModel;
-      collectionsStateMap?: CollectionsStateMap;
-    },
-  ): ObjectAny {
+  getStaticValues(values: ObjectAny | undefined): ObjectAny {
     if (!values) return {};
     const evaluatedValues: ObjectAny = { ...values };
     const propsKeys = Object.keys(values);
@@ -35,18 +26,22 @@ export class DynamicValueWatcher {
       const valueDefinition = values[key];
       if (!isDynamicValueDefinition(valueDefinition)) continue;
 
-      const { value } = evaluateDynamicValueDefinition(valueDefinition, options);
+      const { value } = evaluateDynamicValueDefinition(valueDefinition, this.options);
       evaluatedValues[key] = value;
     }
 
     return evaluatedValues;
   }
 
-  static areStaticValues(values: ObjectAny | undefined) {
+  areStaticValues(values: ObjectAny | undefined) {
     if (!values) return true;
     return Object.keys(values).every((key) => {
       return !isDynamicValueDefinition(values[key]);
     });
+  }
+
+  bindComponent(component: Component) {
+    this.component = component;
   }
 
   setDynamicValues(values: ObjectAny | undefined) {
@@ -55,6 +50,7 @@ export class DynamicValueWatcher {
   }
 
   addDynamicValues(values: ObjectAny | undefined) {
+    const em = this.options.em;
     if (!values) return {};
     this.removeListeners(Object.keys(values));
     const dynamicProps = this.getDynamicValues(values);
@@ -62,10 +58,10 @@ export class DynamicValueWatcher {
     for (let index = 0; index < propsKeys.length; index++) {
       const key = propsKeys[index];
       this.dynamicVariableListeners[key] = new DynamicVariableListenerManager({
-        em: this.em,
+        em: em,
         dataVariable: dynamicProps[key],
         updateValueFromDataVariable: (value: any) => {
-          this.updateFn.bind(this)(key, value);
+          this.updateFn.bind(this)(this.component, key, value);
         },
       });
     }
@@ -83,10 +79,7 @@ export class DynamicValueWatcher {
       if (!isDynamicValueDefinition(values[key])) {
         continue;
       }
-      const { variable } = evaluateDynamicValueDefinition(values[key], {
-        em: this.em,
-        collectionsStateMap: this.collectionsStateMap,
-      });
+      const { variable } = evaluateDynamicValueDefinition(values[key], this.options);
       dynamicValues[key] = variable;
     }
 

@@ -9,26 +9,40 @@ export class ComponentDynamicValueWatcher {
   private attributeWatcher: DynamicValueWatcher;
 
   constructor(
-    private component: Component,
-    options: {
+    component: Component | undefined,
+    private options: {
       em: EditorModel;
       collectionsStateMap: CollectionsStateMap;
     },
   ) {
-    this.propertyWatcher = new DynamicValueWatcher(this.createPropertyUpdater(), options);
-    this.attributeWatcher = new DynamicValueWatcher(this.createAttributeUpdater(), options);
+    this.propertyWatcher = new DynamicValueWatcher(component, this.createPropertyUpdater(), options);
+    this.attributeWatcher = new DynamicValueWatcher(component, this.createAttributeUpdater(), options);
   }
-
   private createPropertyUpdater() {
-    return (key: string, value: any) => {
-      this.component.set(key, value, { fromDataSource: true, avoidStore: true });
+    return (component: Component | undefined, key: string, value: any) => {
+      if (!component) return;
+      component.set(key, value, { fromDataSource: true, avoidStore: true });
     };
   }
 
   private createAttributeUpdater() {
-    return (key: string, value: any) => {
-      this.component.addAttributes({ [key]: value }, { fromDataSource: true, avoidStore: true });
+    return (component: Component | undefined, key: string, value: any) => {
+      if (!component) return;
+      component.addAttributes({ [key]: value }, { fromDataSource: true, avoidStore: true });
     };
+  }
+
+  bindComponent(component: Component) {
+    this.propertyWatcher.bindComponent(component);
+    this.attributeWatcher.bindComponent(component);
+  }
+
+  getStaticValues(values: ObjectAny | undefined): ObjectAny {
+    return this.attributeWatcher.getStaticValues(values);
+  }
+
+  areStaticValues(values: ObjectAny | undefined) {
+    return this.attributeWatcher.areStaticValues(values);
   }
 
   addProps(props: ObjectAny) {
