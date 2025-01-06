@@ -35,21 +35,7 @@ export default class CollectionComponent extends Component {
     super(conditionalCmptDef, opt);
 
     if (this.hasDynamicDataSource()) {
-      const path = this.get(keyCollectionDefinition).config.dataSource?.path;
-      new DynamicVariableListenerManager({
-        em: em,
-        dataVariable: new DataVariable(
-          {
-            type: 'data-variable',
-            path,
-          },
-          { em },
-        ),
-        updateValueFromDataVariable: () => {
-          const collectionItems = getCollectionItems(em, collectionDefinition, parentCollectionStateMap, opt);
-          this.components(collectionItems);
-        },
-      });
+      this.watchDataSource(em, collectionDefinition, parentCollectionStateMap, opt);
     }
   }
 
@@ -65,13 +51,42 @@ export default class CollectionComponent extends Component {
   toJSON(opts?: ObjectAny) {
     const json = super.toJSON(opts) as CollectionComponentDefinition;
 
-    const firstChild = this.components().at(0)?.toJSON() || {};
-    const keysToRemove = ['attributes?.id', keySymbol, keySymbols, keySymbolOvrd, keyCollectionsStateMap];
-    keysToRemove.forEach((key) => delete firstChild[key]);
+    const firstChild = this.getBlockDefinition();
     json[keyCollectionDefinition].block = firstChild;
 
     delete json.components;
     return json;
+  }
+
+  private getBlockDefinition() {
+    const firstChild = this.components().at(0)?.toJSON() || {};
+    const keysToRemove = ['attributes?.id', keySymbol, keySymbols, keySymbolOvrd, keyCollectionsStateMap];
+    keysToRemove.forEach((key) => delete firstChild[key]);
+    return firstChild;
+  }
+
+  private watchDataSource(
+    em: EditorModel,
+    collectionDefinition: CollectionDefinition,
+    parentCollectionStateMap: CollectionsStateMap,
+    opt: ComponentOptions,
+  ) {
+    const path = this.get(keyCollectionDefinition).config.dataSource?.path;
+    const dataVariable = new DataVariable(
+      {
+        type: DataVariableType,
+        path,
+      },
+      { em },
+    );
+    new DynamicVariableListenerManager({
+      em: em,
+      dataVariable,
+      updateValueFromDataVariable: () => {
+        const collectionItems = getCollectionItems(em, collectionDefinition, parentCollectionStateMap, opt);
+        this.components(collectionItems);
+      },
+    });
   }
 }
 
