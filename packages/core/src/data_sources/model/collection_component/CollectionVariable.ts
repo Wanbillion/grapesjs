@@ -3,7 +3,7 @@ import { Model } from '../../../common';
 import EditorModel from '../../../editor/model/Editor';
 import DataVariable, { DataVariableType } from '../DataVariable';
 import { keyInnerCollectionState } from './constants';
-import { CollectionsStateMap } from './types';
+import { CollectionState, CollectionsStateMap } from './types';
 
 export default class CollectionVariable extends Model<CollectionVariableDefinition> {
   em: EditorModel;
@@ -65,33 +65,49 @@ function resolveCollectionVariable(
 ) {
   const { collection_name = keyInnerCollectionState, variable_type, path } = collectionVariableDefinition;
   const collectionItem = collectionsStateMap[collection_name];
+
   if (!collectionItem) {
     em.logError(`Collection not found: ${collection_name}`);
     return '';
   }
+
   if (!variable_type) {
     em.logError(`Missing collection variable type for collection: ${collection_name}`);
     return '';
   }
 
   if (variable_type === 'current_item') {
-    const valueIsDataVariable = collectionItem.current_item?.type === DataVariableType;
-    if (valueIsDataVariable) {
-      const currentItem_path = collectionItem.current_item.path;
-      const resolvedPath = currentItem_path ? `${currentItem_path}.${path}` : path;
-      return {
-        ...collectionItem.current_item,
-        path: resolvedPath,
-      };
-    } else if (!!path) {
-      if (!collectionItem.current_item?.[path]) {
-        em.logError(`Path not found in current item: ${path} for collection: ${collection_name}`);
-        return '';
-      }
-
-      return collectionItem.current_item[path];
-    }
+    return resolveCurrentItem(collectionItem, path, collection_name, em);
   }
 
   return collectionItem[variable_type];
+}
+
+function resolveCurrentItem(
+  collectionItem: CollectionState,
+  path: string | undefined,
+  collection_name: string,
+  em: EditorModel,
+) {
+  const currentItem = collectionItem.current_item;
+
+  if (!currentItem) {
+    em.logError(`Current item is missing for collection: ${collection_name}`);
+    return '';
+  }
+
+  if (currentItem.type === DataVariableType) {
+    const resolvedPath = currentItem.path ? `${currentItem.path}.${path}` : path;
+    return {
+      ...currentItem,
+      path: resolvedPath,
+    };
+  }
+
+  if (path && !currentItem[path]) {
+    em.logError(`Path not found in current item: ${path} for collection: ${collection_name}`);
+    return '';
+  }
+
+  return path ? currentItem[path] : currentItem;
 }
