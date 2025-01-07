@@ -14,25 +14,34 @@ import DynamicVariableListenerManager from '../DataVariableListenerManager';
 export default class CollectionComponent extends Component {
   constructor(props: CollectionComponentDefinition, opt: ComponentOptions) {
     const em = opt.em;
+    // @ts-ignore
+    const cmp: CollectionComponent = super(
+      // @ts-ignore
+      {
+        ...props,
+        components: undefined,
+        droppable: false,
+      },
+      opt,
+    );
+
     const collectionDefinition = props[keyCollectionDefinition];
+    if (!collectionDefinition) {
+      em.logError('missing collection definition');
+
+      return cmp;
+    }
+
     const parentCollectionStateMap = (props[keyCollectionsStateMap] || {}) as CollectionsStateMap;
 
     const components: Component[] = getCollectionItems(em, collectionDefinition, parentCollectionStateMap, opt);
 
-    const conditionalCmptDef = {
-      ...props,
-      type: CollectionComponentType,
-      droppable: false,
-    };
-
-    // @ts-ignore
-    const cmp: CollectionComponent = super(conditionalCmptDef, opt);
     if (this.hasDynamicDataSource()) {
       this.watchDataSource(em, collectionDefinition, parentCollectionStateMap, opt);
     }
     cmp.components(components);
 
-    return cmp as CollectionComponent;
+    return cmp;
   }
 
   static isComponent(el: HTMLElement) {
