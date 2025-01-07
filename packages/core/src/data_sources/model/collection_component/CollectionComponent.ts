@@ -17,12 +17,7 @@ export default class CollectionComponent extends Component {
     const collectionDefinition = props[keyCollectionDefinition];
     const parentCollectionStateMap = (props[keyCollectionsStateMap] || {}) as CollectionsStateMap;
 
-    const components: ComponentDefinition[] = getCollectionItems(
-      em,
-      collectionDefinition,
-      parentCollectionStateMap,
-      opt,
-    );
+    const components: Component[] = getCollectionItems(em, collectionDefinition, parentCollectionStateMap, opt);
 
     const conditionalCmptDef = {
       ...props,
@@ -108,7 +103,7 @@ function getCollectionItems(
     return [];
   }
 
-  const components: ComponentDefinition[] = [];
+  const components: Component[] = [];
 
   let items: any[] = getDataSourceItems(config.dataSource, em);
   const start_index = Math.max(0, config.start_index || 0);
@@ -146,11 +141,12 @@ function getCollectionItems(
         },
         opt,
       ).clone({ symbol: true });
+      blockSymbolMain!.setSymbolOverride([keyCollectionsStateMap]);
     }
+    blockSymbolMain!.set(keyCollectionsStateMap, collectionsStateMap);
     const instance = blockSymbolMain!.clone({ symbol: true });
-    const cmpDefinition = resolveComponent(instance!, block, collectionsStateMap, em);
 
-    components.push(cmpDefinition);
+    components.push(instance);
   }
 
   return components;
@@ -189,31 +185,4 @@ function listDataSourceVariables(dataSource_id: string, em: EditorModel) {
     type: DataVariableType,
     path: dataSource_id + '.' + key,
   }));
-}
-
-function resolveComponent(
-  component: Component,
-  block: ComponentDefinition,
-  collectionsStateMap: CollectionsStateMap,
-  em: EditorModel,
-) {
-  // @ts-ignore
-  component!.set(block);
-
-  const children: ComponentDefinition[] = [];
-  for (let index = 0; index < component!.components().length; index++) {
-    const childSymbol = component!.components().at(index);
-    const childBlock = block['components']![index];
-    const childJSON = resolveComponent(childSymbol, childBlock, collectionsStateMap, em);
-    children.push(childJSON);
-  }
-
-  const componentJSON = component!.toJSON();
-  const componentDefinition: ComponentDefinition = {
-    ...componentJSON,
-    components: children,
-    [keyCollectionsStateMap]: collectionsStateMap,
-  };
-
-  return componentDefinition;
 }
