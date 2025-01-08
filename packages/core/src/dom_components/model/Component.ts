@@ -306,9 +306,8 @@ export default class Component extends StyleableModel<ComponentProperties> {
     };
     this.em = em!;
     this.config = opt.config || {};
-    this.setAttributes({
+    this.addAttributes({
       ...(result(this, 'defaults').attributes || {}),
-      ...(this.get('attributes') || {}),
     });
     this.ccid = Component.createId(this, opt);
     this.preInit();
@@ -696,8 +695,7 @@ export default class Component extends StyleableModel<ComponentProperties> {
    * component.setAttributes({ id: 'test', 'data-key': 'value' });
    */
   setAttributes(attrs: ObjectAny, opts: SetAttrOptions = { skipWatcherUpdates: false, fromDataSource: false }) {
-    const evaluatedAttributes = this.componentDVListener.setAttributes(attrs, opts);
-    this.set('attributes', { ...evaluatedAttributes }, opts);
+    this.set('attributes', { ...attrs }, opts);
 
     return this;
   }

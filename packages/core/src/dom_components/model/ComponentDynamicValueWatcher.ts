@@ -45,24 +45,17 @@ export class ComponentDynamicValueWatcher {
 
   addProps(props: ObjectAny, options: DynamicWatchersOptions = {}) {
     const evaluatedProps = this.propertyWatcher.addDynamicValues(props, options);
-    const shouldSkipOverridUpdates = options.skipWatcherUpdates || options.fromDataSource;
-    if (!shouldSkipOverridUpdates) {
+    if (props.attributes) {
+      const evaluatedAttributes = this.attributeWatcher.setDynamicValues({ ...props.attributes }, options);
+      evaluatedProps['attributes'] = evaluatedAttributes;
+    }
+
+    const skipOverridUpdates = options.skipWatcherUpdates || options.fromDataSource;
+    if (!skipOverridUpdates) {
       this.updateSymbolOverride();
     }
 
     return evaluatedProps;
-  }
-
-  addAttributes(attributes: ObjectAny, options: DynamicWatchersOptions = {}) {
-    const evaluatedAttributes = this.attributeWatcher.addDynamicValues(attributes, options);
-    this.updateSymbolOverride();
-    return evaluatedAttributes;
-  }
-
-  setAttributes(attributes: ObjectAny, options: DynamicWatchersOptions = {}) {
-    const evaluatedAttributes = this.attributeWatcher.setDynamicValues(attributes, options);
-    this.updateSymbolOverride();
-    return evaluatedAttributes;
   }
 
   removeAttributes(attributes: string[]) {
