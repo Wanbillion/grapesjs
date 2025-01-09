@@ -243,35 +243,162 @@ describe('Collection component', () => {
       });
     });
 
-    test('Attributes', () => {
-      const cmp = wrapper.components({
-        type: CollectionComponentType,
-        collectionDefinition: {
-          block: {
-            type: 'default',
-            attributes: {
-              custom_attribute: {
-                type: CollectionVariableType,
-                variable_type: CollectionStateVariableType.current_item,
-                path: 'user',
+    describe('Attributes', () => {
+      let cmp: Component;
+      let firstChild!: Component;
+      let firstGrandchild!: Component;
+      let secondChild!: Component;
+      let secondGrandchild!: Component;
+      let thirdChild!: Component;
+
+      beforeEach(() => {
+        cmp = wrapper.components({
+          type: CollectionComponentType,
+          collectionDefinition: {
+            block: {
+              type: 'default',
+              components: [
+                {
+                  type: 'default',
+                  attributes: {
+                    content: {
+                      type: CollectionVariableType,
+                      variable_type: CollectionStateVariableType.current_item,
+                      path: 'user',
+                    }
+                  },
+                },
+              ],
+              attributes: {
+                content: {
+                  type: CollectionVariableType,
+                  variable_type: CollectionStateVariableType.current_item,
+                  path: 'user',
+                }
+              },
+            },
+            config: {
+              dataSource: {
+                type: DataVariableType,
+                path: 'my_data_source_id',
               },
             },
           },
-          config: {
-            dataSource: {
-              type: DataVariableType,
-              path: 'my_data_source_id',
-            },
-          },
-        },
-      })[0];
+        })[0];
 
-      const firstChild = cmp.components().at(0);
-      const secondChild = cmp.components().at(1);
+        firstChild = cmp.components().at(0);
+        firstGrandchild = firstChild.components().at(0);
+        secondChild = cmp.components().at(1);
+        secondGrandchild = secondChild.components().at(0);
+        thirdChild = cmp.components().at(2);
+      });
 
-      expect(firstChild.getAttributes()['custom_attribute']).toBe('user1');
+      test('Evaluating to static value', () => {
+        expect(firstChild.getAttributes()['content']).toBe('user1');
+        expect(firstGrandchild.getAttributes()['content']).toBe('user1');
 
-      expect(secondChild.getAttributes()['custom_attribute']).toBe('user2');
+        expect(secondChild.getAttributes()['content']).toBe('user2');
+        expect(secondGrandchild.getAttributes()['content']).toBe('user2');
+      });
+
+      test('Updating the record', async () => {
+        firstRecord.set('user', 'new_user1_value');
+        expect(firstChild.getAttributes()['content']).toBe('new_user1_value');
+        expect(firstGrandchild.getAttributes()['content']).toBe('new_user1_value');
+
+        expect(secondChild.getAttributes()['content']).toBe('user2');
+        expect(secondGrandchild.getAttributes()['content']).toBe('user2');
+      });
+
+      test('Updating the value to a static value', async () => {
+        firstChild.setAttributes({ content: 'new_content_value' });
+        expect(firstChild.getAttributes()['content']).toBe('new_content_value');
+        expect(secondChild.getAttributes()['content']).toBe('new_content_value');
+
+        firstRecord.set('user', 'wrong_value');
+        expect(firstChild.getAttributes()['content']).toBe('new_content_value');
+        expect(secondChild.getAttributes()['content']).toBe('new_content_value');
+
+        firstGrandchild.setAttributes({ content: 'new_content_value' });
+        expect(firstGrandchild.getAttributes()['content']).toBe('new_content_value');
+        expect(secondGrandchild.getAttributes()['content']).toBe('new_content_value');
+
+        firstRecord.set('user', 'wrong_value');
+        expect(firstGrandchild.getAttributes()['content']).toBe('new_content_value');
+        expect(secondGrandchild.getAttributes()['content']).toBe('new_content_value');
+      });
+
+      test('Updating the value to a diffirent collection variable', async () => {
+        firstChild.setAttributes({
+          content: {
+            // @ts-ignore
+            type: CollectionVariableType,
+            variable_type: CollectionStateVariableType.current_item,
+            path: 'age',
+          }
+        });
+        expect(firstChild.getAttributes()['content']).toBe('12');
+        expect(secondChild.getAttributes()['content']).toBe('14');
+
+        firstRecord.set('age', 'new_value_12');
+        secondRecord.set('age', 'new_value_14');
+
+        firstRecord.set('user', 'wrong_value');
+        secondRecord.set('user', 'wrong_value');
+
+        expect(firstChild.getAttributes()['content']).toBe('new_value_12');
+        expect(secondChild.getAttributes()['content']).toBe('new_value_14');
+
+        firstGrandchild.setAttributes({
+          content: {
+            // @ts-ignore
+            type: CollectionVariableType,
+            variable_type: CollectionStateVariableType.current_item,
+            path: 'age',
+          }
+        });
+        expect(firstGrandchild.getAttributes()['content']).toBe('new_value_12');
+        expect(secondGrandchild.getAttributes()['content']).toBe('new_value_14');
+
+        firstRecord.set('age', 'most_new_value_12');
+        secondRecord.set('age', 'most_new_value_14');
+
+        expect(firstGrandchild.getAttributes()['content']).toBe('most_new_value_12');
+        expect(secondGrandchild.getAttributes()['content']).toBe('most_new_value_14');
+      });
+
+      test('Updating the value to a diffirent dynamic variable', async () => {
+        firstChild.setAttributes({
+          content: {
+            // @ts-ignore
+            type: DataVariableType,
+            path: 'my_data_source_id.user2.user',
+          }
+        });
+        expect(firstChild.getAttributes()['content']).toBe('user2');
+        expect(secondChild.getAttributes()['content']).toBe('user2');
+        expect(thirdChild.getAttributes()['content']).toBe('user2');
+
+        secondRecord.set('user', 'new_value');
+        expect(firstChild.getAttributes()['content']).toBe('new_value');
+        expect(secondChild.getAttributes()['content']).toBe('new_value');
+        expect(thirdChild.getAttributes()['content']).toBe('new_value');
+
+        firstGrandchild.setAttributes({
+          content: {
+            // @ts-ignore
+            type: DataVariableType,
+            path: 'my_data_source_id.user2.user',
+          }
+        });
+        expect(firstGrandchild.getAttributes()['content']).toBe('new_value');
+        expect(secondGrandchild.getAttributes()['content']).toBe('new_value');
+
+        secondRecord.set('user', 'most_new_value');
+
+        expect(firstGrandchild.getAttributes()['content']).toBe('most_new_value');
+        expect(secondGrandchild.getAttributes()['content']).toBe('most_new_value');
+      });
     });
 
     test('Traits', () => {
