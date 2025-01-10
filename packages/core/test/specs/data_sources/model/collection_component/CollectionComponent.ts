@@ -7,7 +7,7 @@ import {
 import { CollectionStateVariableType } from '../../../../../src/data_sources/model/collection_component/types';
 import EditorModel from '../../../../../src/editor/model/Editor';
 import { filterObjectForSnapshot, setupTestEditor } from '../../../../common';
-import { getSymbolMain, getSymbolTop } from '../../../../../src/dom_components/model/SymbolUtils';
+import { getSymbolMain } from '../../../../../src/dom_components/model/SymbolUtils';
 import { ProjectData } from '../../../../../src/storage_manager';
 
 describe('Collection component', () => {
@@ -39,7 +39,7 @@ describe('Collection component', () => {
     em.destroy();
   });
 
-  test('Should be undroppable', () => {
+  test('Collection component should be undroppable', () => {
     const cmp = wrapper.components({
       type: CollectionComponentType,
       collectionDefinition: {
@@ -56,6 +56,27 @@ describe('Collection component', () => {
     })[0];
 
     expect(cmp.get('droppable')).toBe(false);
+  });
+
+  test('Collection items should be undraggable', () => {
+    const cmp = wrapper.components({
+      type: CollectionComponentType,
+      collectionDefinition: {
+        block: {
+          type: 'default',
+        },
+        config: {
+          dataSource: {
+            type: DataVariableType,
+            path: 'my_data_source_id',
+          },
+        },
+      },
+    })[0];
+
+    cmp.components().forEach((child) => {
+      expect(child.get('draggable')).toBe(false);
+    });
   });
 
   test('Collection items should be symbols', () => {

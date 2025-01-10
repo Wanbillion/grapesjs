@@ -67,6 +67,8 @@ export default class CollectionComponent extends Component {
 
   private getBlockDefinition() {
     const firstChild = this.components().at(0)?.toJSON() || {};
+    delete firstChild.draggable;
+
     return firstChild;
   }
 
@@ -148,6 +150,7 @@ function getCollectionItems(
           ...block,
           [keyCollectionsStateMap]: collectionsStateMap,
           isCollectionItem: true,
+          draggable: false,
         },
         opt,
       );
