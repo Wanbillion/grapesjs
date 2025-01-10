@@ -590,6 +590,29 @@ describe('Collection component', () => {
                 type: CollectionVariableType,
                 variable_type: variableType,
               },
+              attributes: {
+                custom_attribute: {
+                  type: CollectionVariableType,
+                  variable_type: variableType,
+                },
+              },
+              traits: [
+                {
+                  name: 'attribute_trait',
+                  value: {
+                    type: CollectionVariableType,
+                    variable_type: variableType,
+                  },
+                },
+                {
+                  name: 'property_trait',
+                  changeProp: true,
+                  value: {
+                    type: CollectionVariableType,
+                    variable_type: variableType,
+                  },
+                },
+              ],
             },
             config: {
               dataSource: {
@@ -605,6 +628,9 @@ describe('Collection component', () => {
 
         children.each((child, index) => {
           expect(child.get('content')).toBe(expectedValues[index]);
+          expect(child.get('property_trait')).toBe(expectedValues[index]);
+          expect(child.getAttributes()['custom_attribute']).toBe(expectedValues[index]);
+          expect(child.getAttributes()['attribute_trait']).toBe(expectedValues[index]);
         });
       });
     });
