@@ -1,7 +1,7 @@
 import DataVariable, { DataVariableType } from './../DataVariable';
 import { isArray } from 'underscore';
 import Component, { keySymbol, keySymbolOvrd, keySymbols } from '../../../dom_components/model/Component';
-import { ComponentOptions, ComponentProperties } from '../../../dom_components/model/types';
+import { ComponentDefinition, ComponentOptions, ComponentProperties } from '../../../dom_components/model/types';
 import { toLowerCase } from '../../../utils/mixins';
 import DataSource from '../DataSource';
 import { ObjectAny } from '../../../common';
@@ -10,6 +10,7 @@ import { keyCollectionsStateMap } from '../../../dom_components/model/Component'
 import { CollectionComponentDefinition, CollectionDefinition, CollectionState, CollectionsStateMap } from './types';
 import { keyCollectionDefinition, keyInnerCollectionState, CollectionComponentType } from './constants';
 import DynamicVariableListenerManager from '../DataVariableListenerManager';
+import Components from '../../../dom_components/model/Components';
 
 export default class CollectionComponent extends Component {
   constructor(props: CollectionComponentDefinition, opt: ComponentOptions) {
@@ -60,13 +61,13 @@ export default class CollectionComponent extends Component {
     json[keyCollectionDefinition].block = firstChild;
 
     delete json.components;
+    delete json.droppable;
     return json;
   }
 
   private getBlockDefinition() {
     const firstChild = this.components().at(0)?.toJSON() || {};
-    const keysToRemove = ['attributes?.id', keySymbol, keySymbols, keySymbolOvrd, keyCollectionsStateMap];
-    keysToRemove.forEach((key) => delete firstChild[key]);
+    console.log('🚀 ~ CollectionComponent ~ getBlockDefinition ~ firstChild:', firstChild);
     return firstChild;
   }
 

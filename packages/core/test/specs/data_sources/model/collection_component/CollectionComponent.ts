@@ -149,7 +149,7 @@ describe('Collection component', () => {
         expect(secondGrandchild.get('content')).toBe('user2');
       });
 
-      test('Updating the record', async () => {
+      test('Watching Records', async () => {
         firstRecord.set('user', 'new_user1_value');
         expect(firstChild.get('content')).toBe('new_user1_value');
         expect(firstChild.get('custom_property')).toBe('new_user1_value');
@@ -265,7 +265,7 @@ describe('Collection component', () => {
                       type: CollectionVariableType,
                       variable_type: CollectionStateVariableType.current_item,
                       path: 'user',
-                    }
+                    },
                   },
                 },
               ],
@@ -274,7 +274,7 @@ describe('Collection component', () => {
                   type: CollectionVariableType,
                   variable_type: CollectionStateVariableType.current_item,
                   path: 'user',
-                }
+                },
               },
             },
             config: {
@@ -301,7 +301,7 @@ describe('Collection component', () => {
         expect(secondGrandchild.getAttributes()['content']).toBe('user2');
       });
 
-      test('Updating the record', async () => {
+      test('Watching Records', async () => {
         firstRecord.set('user', 'new_user1_value');
         expect(firstChild.getAttributes()['content']).toBe('new_user1_value');
         expect(firstGrandchild.getAttributes()['content']).toBe('new_user1_value');
@@ -335,7 +335,7 @@ describe('Collection component', () => {
             type: CollectionVariableType,
             variable_type: CollectionStateVariableType.current_item,
             path: 'age',
-          }
+          },
         });
         expect(firstChild.getAttributes()['content']).toBe('12');
         expect(secondChild.getAttributes()['content']).toBe('14');
@@ -355,7 +355,7 @@ describe('Collection component', () => {
             type: CollectionVariableType,
             variable_type: CollectionStateVariableType.current_item,
             path: 'age',
-          }
+          },
         });
         expect(firstGrandchild.getAttributes()['content']).toBe('new_value_12');
         expect(secondGrandchild.getAttributes()['content']).toBe('new_value_14');
@@ -373,7 +373,7 @@ describe('Collection component', () => {
             // @ts-ignore
             type: DataVariableType,
             path: 'my_data_source_id.user2.user',
-          }
+          },
         });
         expect(firstChild.getAttributes()['content']).toBe('user2');
         expect(secondChild.getAttributes()['content']).toBe('user2');
@@ -389,7 +389,7 @@ describe('Collection component', () => {
             // @ts-ignore
             type: DataVariableType,
             path: 'my_data_source_id.user2.user',
-          }
+          },
         });
         expect(firstGrandchild.getAttributes()['content']).toBe('new_value');
         expect(secondGrandchild.getAttributes()['content']).toBe('new_value');
@@ -445,48 +445,65 @@ describe('Collection component', () => {
 
       expect(secondChild.getAttributes()['attribute_trait']).toBe('user2');
       expect(secondChild.get('property_trait')).toBe('user2');
+
+      firstRecord.set('user', 'new_user1_value');
+      expect(firstChild.getAttributes()['attribute_trait']).toBe('new_user1_value');
+      expect(firstChild.get('property_trait')).toBe('new_user1_value');
+
+      expect(secondChild.getAttributes()['attribute_trait']).toBe('user2');
+      expect(secondChild.get('property_trait')).toBe('user2');
     });
   });
 
-  describe('Stringfication', () => {
-    test('Collection with dynamic datasource', () => {
-      const cmp = wrapper.components({
-        type: CollectionComponentType,
-        collectionDefinition: {
-          collection_name: 'my_collection',
-          block: {
-            type: 'default',
-            content: {
+  describe('Serialization', () => {
+    test('Serializion with Collection Variables to JSON', () => {
+      const cmpDefinition = {
+        type: 'default',
+        content: {
+          type: CollectionVariableType,
+          variable_type: CollectionStateVariableType.current_item,
+          path: 'user',
+        },
+        custom_prop: {
+          type: CollectionVariableType,
+          variable_type: CollectionStateVariableType.current_index,
+          path: 'user',
+        },
+        attributes: {
+          content: {
+            type: CollectionVariableType,
+            variable_type: CollectionStateVariableType.current_item,
+            path: 'user',
+          },
+        },
+        traits: [
+          {
+            name: 'attribute_trait',
+            value: {
               type: CollectionVariableType,
               variable_type: CollectionStateVariableType.current_item,
               path: 'user',
             },
-            attributes: {
-              content: {
-                type: CollectionVariableType,
-                variable_type: CollectionStateVariableType.current_item,
-                path: 'user',
-              },
+          },
+          {
+            name: 'property_trait',
+            changeProp: true,
+            value: {
+              type: CollectionVariableType,
+              variable_type: CollectionStateVariableType.current_item,
+              path: 'user',
             },
-            traits: [
-              {
-                name: 'attribute_trait',
-                value: {
-                  type: CollectionVariableType,
-                  variable_type: CollectionStateVariableType.current_item,
-                  path: 'user',
-                },
-              },
-              {
-                name: 'property_trait',
-                changeProp: true,
-                value: {
-                  type: CollectionVariableType,
-                  variable_type: CollectionStateVariableType.current_item,
-                  path: 'user',
-                },
-              },
-            ],
+          },
+        ],
+      };
+
+      const collectionComponentDefinition = {
+        type: CollectionComponentType,
+        collectionDefinition: {
+          collection_name: 'my_collection',
+          block: {
+            ...cmpDefinition,
+            components: [cmpDefinition, cmpDefinition],
           },
           config: {
             start_index: 0,
@@ -497,10 +514,21 @@ describe('Collection component', () => {
             },
           },
         },
-      })[0];
+      };
+      const cmp = wrapper.components(collectionComponentDefinition)[0];
+      expect(filterObjectForSnapshot(cmp.toJSON())).toMatchSnapshot();
 
-      const json = cmp.toJSON();
-      expect(filterObjectForSnapshot(json)).toMatchSnapshot();
+      const firstChild = cmp.components().at(0);
+      const newChildDefinition = {
+        type: 'default',
+        content: {
+          type: CollectionVariableType,
+          variable_type: CollectionStateVariableType.current_index,
+          path: 'user',
+        },
+      };
+      firstChild.components().at(0).components(newChildDefinition);
+      expect(filterObjectForSnapshot(cmp.toJSON())).toMatchSnapshot();
     });
   });
 

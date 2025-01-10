@@ -70,10 +70,10 @@ export class ComponentDynamicValueWatcher {
 
   private updateSymbolOverride() {
     if (!this.component || !this.component.get('isCollectionItem')) return;
-    
+
     const keys = this.propertyWatcher.getDynamicValuesOfType(CollectionVariableType);
     const attributesKeys = this.attributeWatcher.getDynamicValuesOfType(CollectionVariableType);
-    
+
     const combinedKeys = [keyCollectionsStateMap, ...keys];
     const haveOverridenAttributes = Object.keys(attributesKeys).length;
     if (haveOverridenAttributes) combinedKeys.push('attributes');

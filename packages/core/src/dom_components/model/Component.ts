@@ -1605,7 +1605,17 @@ export default class Component extends StyleableModel<ComponentProperties> {
     delete obj.open; // used in Layers
     delete obj._undoexc;
     delete obj.delegate;
-    delete obj[keyCollectionsStateMap];
+    if (this.get('isCollectionItem')) {
+      delete obj[keySymbol];
+      delete obj[keySymbolOvrd];
+      delete obj[keySymbols];
+      delete obj[keyCollectionsStateMap];
+      delete obj['isCollectionItem'];
+      delete obj.attributes.id;
+      obj['components'] = this.components()
+        .toArray()
+        .map((cmp) => cmp.toJSON());
+    }
 
     if (!opts.fromUndo) {
       const symbol = obj[keySymbol];
