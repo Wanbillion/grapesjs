@@ -978,7 +978,7 @@ export default class Component extends StyleableModel<ComponentProperties> {
       const value = trait.getInitValue();
 
       if (trait.changeProp) {
-        !this.get(name) && this.set(name, value);
+        isUndefined(this.get(name)) && this.set(name, value);
       } else {
         if (name && value) attrs[name] = value;
       }

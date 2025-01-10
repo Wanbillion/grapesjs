@@ -67,7 +67,6 @@ export default class CollectionComponent extends Component {
 
   private getBlockDefinition() {
     const firstChild = this.components().at(0)?.toJSON() || {};
-    console.log('🚀 ~ CollectionComponent ~ getBlockDefinition ~ firstChild:', firstChild);
     return firstChild;
   }
 
