@@ -1,5 +1,5 @@
 import { isEmpty, isArray, isString, isFunction, each, includes, extend, flatten, keys } from 'underscore';
-import Component, { keyCollectionsStateMap } from './Component';
+import Component from './Component';
 import { AddOptions, Collection } from '../../common';
 import { DomComponentsConfig } from '../config/config';
 import EditorModel from '../../editor/model/Editor';
@@ -17,7 +17,6 @@ import ComponentText from './ComponentText';
 import ComponentWrapper from './ComponentWrapper';
 import { ComponentsEvents, ParseStringOptions } from '../types';
 import { isSymbolInstance, isSymbolRoot, updateSymbolComps } from './SymbolUtils';
-import { CollectionsStateMap } from '../../data_sources/model/collection_component/types';
 
 export const getComponentIds = (cmp?: Component | Component[] | Components, res: string[] = []) => {
   if (!cmp) return [];
@@ -88,8 +87,6 @@ export interface ComponentsOptions {
   em: EditorModel;
   config?: DomComponentsConfig;
   domc?: ComponentManager;
-  collectionsStateMap?: CollectionsStateMap;
-  isCollectionItem?: boolean;
 }
 
 interface AddComponentOptions extends AddOptions {
@@ -331,20 +328,7 @@ Component> {
    */
   processDef(mdl: Component | ComponentDefinition | ComponentDefinitionDefined) {
     // Avoid processing Models
-    if (mdl.cid && mdl.ccid) {
-      const componentCollectionsStateMap = mdl.get(keyCollectionsStateMap);
-      const parentCollectionsStateMap = this.opt.collectionsStateMap;
-      mdl.set(keyCollectionsStateMap, {
-        ...componentCollectionsStateMap,
-        ...parentCollectionsStateMap,
-      });
-
-      if (!mdl.get('isCollectionItem') && this.opt.isCollectionItem) {
-        mdl.set('isCollectionItem', this.opt.isCollectionItem);
-      }
-
-      return mdl;
-    }
+    if (mdl.cid && mdl.ccid) return mdl;
     const { em, config = {} } = this;
     const { processor } = config;
     let model = mdl;
@@ -392,18 +376,12 @@ Component> {
       extend(model, res.props);
     }
 
-    return {
-      ...(this.opt.isCollectionItem && {
-        isCollectionItem: this.opt.isCollectionItem,
-        [keyCollectionsStateMap]: {
-          ...this.opt.collectionsStateMap,
-        },
-      }),
-      ...model,
-    };
+    return model;
   }
 
   onAdd(model: Component, c?: any, opts: { temporary?: boolean } = {}) {
+    model.initialParent = this.parent;
+    model.propagateDeeplyFromParent();
     const { domc, em } = this;
     const style = model.getStyle();
     const avoidInline = em && em.getConfig().avoidInlineStyle;

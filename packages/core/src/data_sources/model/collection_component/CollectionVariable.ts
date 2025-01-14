@@ -64,6 +64,8 @@ function resolveCollectionVariable(
   em: EditorModel,
 ) {
   const { collectionName = keyInnerCollectionState, variableType, path } = collectionVariableDefinition;
+  if (!collectionsStateMap) return;
+
   const collectionItem = collectionsStateMap[collectionName];
 
   if (!collectionItem) {

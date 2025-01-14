@@ -14,24 +14,26 @@ export interface DynamicWatchersOptions {
 
 export class DynamicValueWatcher {
   private dynamicVariableListeners: { [key: string]: DynamicVariableListenerManager } = {};
+  private em: EditorModel;
+  private collectionsStateMap?: CollectionsStateMap;
   constructor(
     private component: Component | undefined,
     private updateFn: (component: Component | undefined, key: string, value: any) => void,
-    private options: {
+    options: {
       em: EditorModel;
       collectionsStateMap?: CollectionsStateMap;
     },
-  ) {}
+  ) {
+    this.em = options.em;
+    this.collectionsStateMap = options.collectionsStateMap;
+  }
 
   bindComponent(component: Component) {
     this.component = component;
   }
 
   updateCollectionStateMap(collectionsStateMap: CollectionsStateMap) {
-    this.options = {
-      ...this.options,
-      collectionsStateMap,
-    };
+    this.collectionsStateMap = collectionsStateMap;
 
     const collectionVariablesKeys = this.getDynamicValuesOfType(CollectionVariableType);
     const collectionVariablesObject = collectionVariablesKeys.reduce(
@@ -71,7 +73,7 @@ export class DynamicValueWatcher {
   }
 
   private updateListeners(values: { [key: string]: any }) {
-    const em = this.options.em;
+    const { em, collectionsStateMap } = this;
     this.removeListeners(Object.keys(values));
     const propsKeys = Object.keys(values);
     for (let index = 0; index < propsKeys.length; index++) {
@@ -80,9 +82,12 @@ export class DynamicValueWatcher {
         continue;
       }
 
-      const { variable } = evaluateDynamicValueDefinition(values[key], this.options);
+      const { variable } = evaluateDynamicValueDefinition(values[key], {
+        em,
+        collectionsStateMap,
+      });
       this.dynamicVariableListeners[key] = new DynamicVariableListenerManager({
-        em: em,
+        em,
         dataVariable: variable,
         updateValueFromDataVariable: (value: any) => {
           this.updateFn.bind(this)(this.component, key, value);
@@ -92,6 +97,7 @@ export class DynamicValueWatcher {
   }
 
   private evaluateValues(values: ObjectAny) {
+    const { em, collectionsStateMap } = this;
     const evaluatedValues: {
       [key: string]: any;
     } = { ...values };
@@ -101,7 +107,10 @@ export class DynamicValueWatcher {
       if (!isDynamicValueDefinition(values[key])) {
         continue;
       }
-      const { value } = evaluateDynamicValueDefinition(values[key], this.options);
+      const { value } = evaluateDynamicValueDefinition(values[key], {
+        em,
+        collectionsStateMap,
+      });
       evaluatedValues[key] = value;
     }
 

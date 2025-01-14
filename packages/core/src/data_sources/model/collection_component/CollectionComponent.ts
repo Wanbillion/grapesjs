@@ -150,6 +150,7 @@ function getCollectionItems(
           [keyCollectionsStateMap]: collectionsStateMap,
           isCollectionItem: true,
           draggable: false,
+          deepPropagate: [setCollectionStateMap(collectionsStateMap)],
         },
         opt,
       );
@@ -162,6 +163,13 @@ function getCollectionItems(
   }
 
   return components;
+}
+
+function setCollectionStateMap(collectionsStateMap: CollectionsStateMap) {
+  return (cmp: Component) => {
+    cmp.set('isCollectionItem', true);
+    cmp.set(keyCollectionsStateMap, collectionsStateMap);
+  };
 }
 
 function getDataSourceItems(dataSource: any, em: EditorModel) {

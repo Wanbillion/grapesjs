@@ -15,7 +15,7 @@ export class ComponentDynamicValueWatcher {
     private component: Component | undefined,
     options: {
       em: EditorModel;
-      collectionsStateMap: CollectionsStateMap;
+      collectionsStateMap?: CollectionsStateMap;
     },
   ) {
     this.propertyWatcher = new DynamicValueWatcher(component, this.createPropertyUpdater(), options);

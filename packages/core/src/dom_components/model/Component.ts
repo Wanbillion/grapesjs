@@ -26,6 +26,7 @@ import {
   ComponentDefinitionDefined,
   ComponentOptions,
   ComponentProperties,
+  DeepPropagationArray,
   DragMode,
   ResetComponentsOptions,
   SymbolToUpOptions,
@@ -55,9 +56,9 @@ import {
 import { ComponentDynamicValueWatcher } from './ComponentDynamicValueWatcher';
 import { DynamicWatchersOptions } from './DynamicValueWatcher';
 
-export interface IComponent extends ExtractMethods<Component> {}
-export interface SetAttrOptions extends SetOptions, UpdateStyleOptions, DynamicWatchersOptions {}
-export interface ComponentSetOptions extends SetOptions, DynamicWatchersOptions {}
+export interface IComponent extends ExtractMethods<Component> { }
+export interface SetAttrOptions extends SetOptions, UpdateStyleOptions, DynamicWatchersOptions { }
+export interface ComponentSetOptions extends SetOptions, DynamicWatchersOptions { }
 
 const escapeRegExp = (str: string) => {
   return str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
@@ -128,6 +129,8 @@ export const keyIsCollectionItem = '__is_collection_item';
  * @property {Array<String>} [propagate=[]] Indicates an array of properties which will be inhereted by all NEW appended children.
  *  For example if you create a component likes this: `{ removable: false, draggable: false, propagate: ['removable', 'draggable'] }`
  *  and append some new component inside, the new added component will get the exact same properties indicated in the `propagate` array (and the `propagate` property itself). Default: `[]`
+ * @property {Array<String|Function>} [deepPropagate=[]] Indicates an array of properties or functions that will be inherited by all descendant
+ * components, including those nested within multiple levels of child components.
  * @property {Array<Object>} [toolbar=null] Set an array of items to show up inside the toolbar when the component is selected (move, clone, delete).
  * Eg. `toolbar: [ { attributes: {class: 'fa fa-arrows'}, command: 'tlb-move' }, ... ]`.
  * By default, when `toolbar` property is falsy the editor will add automatically commands `core:component-exit` (select parent component, added if there is one), `tlb-move` (added if `draggable`) , `tlb-clone` (added if `copyable`), `tlb-delete` (added if `removable`).
@@ -174,6 +177,7 @@ export default class Component extends StyleableModel<ComponentProperties> {
       attributes: {},
       traits: ['id', 'title'],
       propagate: '',
+      deepPropagate: '',
       dmode: '',
       toolbar: null,
       delegate: null,
@@ -225,12 +229,12 @@ export default class Component extends StyleableModel<ComponentProperties> {
     return this.frame?.getPage();
   }
 
-  preInit() {}
+  preInit() { }
 
   /**
    * Hook method, called once the model is created
    */
-  init() {}
+  init() { }
 
   /**
    * Hook method, called when the model has been updated (eg. updated some model's property)
@@ -238,12 +242,12 @@ export default class Component extends StyleableModel<ComponentProperties> {
    * @param {*} value Property value, if triggered after some property update
    * @param {*} previous Property previous value, if triggered after some property update
    */
-  updated(property: string, value: any, previous: any) {}
+  updated(property: string, value: any, previous: any) { }
 
   /**
    * Hook method, called once the model has been removed
    */
-  removed() {}
+  removed() { }
 
   em!: EditorModel;
   opt!: ComponentOptions;
@@ -261,6 +265,8 @@ export default class Component extends StyleableModel<ComponentProperties> {
    * @ts-ignore */
   collection!: Components;
   componentDVListener: ComponentDynamicValueWatcher;
+  initialParent?: Component;
+  accumulatedPropagatedProps: DeepPropagationArray = [];
 
   constructor(props: ComponentProperties = {}, opt: ComponentOptions) {
     const componentDVListener = new ComponentDynamicValueWatcher(undefined, {
@@ -298,11 +304,7 @@ export default class Component extends StyleableModel<ComponentProperties> {
     }
 
     opt.em = em;
-    this.opt = {
-      ...opt,
-      collectionsStateMap: props[keyCollectionsStateMap],
-      isCollectionItem: !!props['isCollectionItem'],
-    };
+    this.opt = { ...opt };
     this.em = em!;
     this.config = opt.config || {};
     this.addAttributes({
@@ -311,6 +313,8 @@ export default class Component extends StyleableModel<ComponentProperties> {
     this.ccid = Component.createId(this, opt);
     this.preInit();
     this.initClasses();
+    this.listenTo(this, `change:${keyCollectionsStateMap}`, this.handleCollectionsMapStateChange);
+    this.propagateDeeplyFromParent();
     this.initComponents();
     this.initTraits();
     this.initToolbar();
@@ -319,7 +323,6 @@ export default class Component extends StyleableModel<ComponentProperties> {
     this.listenTo(this, 'change:tagName', this.tagUpdated);
     this.listenTo(this, 'change:attributes', this.attrUpdated);
     this.listenTo(this, 'change:attributes:id', this._idUpdated);
-    this.listenTo(this, `change:${keyCollectionsStateMap}`, this._collectionsStateUpdated);
     this.on('change:toolbar', this.__emitUpdateTlb);
     this.on('change', this.__onChange);
     this.on(keyUpdateInside, this.__propToParent);
@@ -380,6 +383,28 @@ export default class Component extends StyleableModel<ComponentProperties> {
     const evaluatedProps = this.componentDVListener.addProps(attributes, options);
 
     return super.set(evaluatedProps, options);
+  }
+
+  propagateDeeplyFromParent() {
+    const parent = this.parent();
+    if (!parent) return;
+    const parentDeepPropagate = parent.accumulatedPropagatedProps;
+
+    // Execute functions and set inherited properties
+    if (parentDeepPropagate) {
+      const newAttr: Partial<ComponentProperties> = {};
+      parentDeepPropagate.forEach((prop) => {
+        if (typeof prop === 'string' && isUndefined(this.get(prop))) {
+          newAttr[prop] = parent.get(prop as string);
+        } else if (typeof prop === 'function') {
+          prop(this); // Execute function on current component
+        }
+      });
+
+      this.set({ ...newAttr });
+    }
+
+    this.accumulatedPropagatedProps = [...(this.get('deepPropagate') ?? []), ...parentDeepPropagate];
   }
 
   __postAdd(opts: { recursive?: boolean } = {}) {
@@ -1072,6 +1097,7 @@ export default class Component extends StyleableModel<ComponentProperties> {
       return coll as any;
     } else {
       coll.reset(undefined, opts);
+      // @ts-ignore
       return components ? this.append(components, opts) : ([] as any);
     }
   }
@@ -1118,6 +1144,7 @@ export default class Component extends StyleableModel<ComponentProperties> {
    * // -> Component
    */
   parent(opts: any = {}): Component | undefined {
+    if (!this.collection && this.initialParent) return this.initialParent;
     const coll = this.collection || (opts.prev && this.prevColl);
     return coll ? coll.parent : undefined;
   }
@@ -1616,6 +1643,7 @@ export default class Component extends StyleableModel<ComponentProperties> {
         .toArray()
         .map((cmp) => cmp.toJSON());
     }
+    delete obj.deepPropagate;
 
     if (!opts.fromUndo) {
       const symbol = obj[keySymbol];
@@ -1989,10 +2017,10 @@ export default class Component extends StyleableModel<ComponentProperties> {
     selector && selector.set({ name: id, label: id });
   }
 
-  _collectionsStateUpdated(m: any, v: CollectionsStateMap, opts = {}) {
+  private handleCollectionsMapStateChange(m: any, v: CollectionsStateMap, opts = {}) {
     this.componentDVListener.updateCollectionStateMap(v);
-    this.components().forEach((child) => {
-      child.set(keyCollectionsStateMap, v);
+    this.components()?.forEach((child) => {
+      child.set?.(keyCollectionsStateMap, v);
     });
   }
 
