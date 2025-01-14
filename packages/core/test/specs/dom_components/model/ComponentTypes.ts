@@ -101,7 +101,7 @@ describe('Component Types', () => {
 
 export type CollectionVariableDefinition = {
   type: typeof CollectionVariableType;
-  variable_type: CollectionStateVariableType;
-  collection_name?: string;
+  variableType: CollectionStateVariableType;
+  collectionName?: string;
   path?: string;
 };

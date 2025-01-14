@@ -1,7 +1,7 @@
 import DataVariable, { DataVariableType } from './../DataVariable';
 import { isArray } from 'underscore';
-import Component, { keySymbol, keySymbolOvrd, keySymbols } from '../../../dom_components/model/Component';
-import { ComponentDefinition, ComponentOptions, ComponentProperties } from '../../../dom_components/model/types';
+import Component from '../../../dom_components/model/Component';
+import { ComponentOptions } from '../../../dom_components/model/types';
 import { toLowerCase } from '../../../utils/mixins';
 import DataSource from '../DataSource';
 import { ObjectAny } from '../../../common';
@@ -10,7 +10,6 @@ import { keyCollectionsStateMap } from '../../../dom_components/model/Component'
 import { CollectionComponentDefinition, CollectionDefinition, CollectionState, CollectionsStateMap } from './types';
 import { keyCollectionDefinition, keyInnerCollectionState, CollectionComponentType } from './constants';
 import DynamicVariableListenerManager from '../DataVariableListenerManager';
-import Components from '../../../dom_components/model/Components';
 
 export default class CollectionComponent extends Component {
   constructor(props: CollectionComponentDefinition, opt: ComponentOptions) {
@@ -103,7 +102,7 @@ function getCollectionItems(
   parentCollectionStateMap: CollectionsStateMap,
   opt: ComponentOptions,
 ) {
-  const { collection_name, block, config } = collectionDefinition;
+  const { collectionName, block, config } = collectionDefinition;
   if (!block) {
     em.logError('The "block" property is required in the collection definition.');
     return [];
@@ -117,30 +116,30 @@ function getCollectionItems(
   const components: Component[] = [];
 
   let items: any[] = getDataSourceItems(config.dataSource, em);
-  const start_index = Math.max(0, config.start_index || 0);
-  const end_index = Math.min(items.length - 1, config.end_index !== undefined ? config.end_index : Number.MAX_VALUE);
+  const startIndex = Math.max(0, config.startIndex || 0);
+  const endIndex = Math.min(items.length - 1, config.endIndex !== undefined ? config.endIndex : Number.MAX_VALUE);
 
-  const total_items = end_index - start_index + 1;
+  const totalItems = endIndex - startIndex + 1;
   let blockSymbolMain: Component;
-  for (let index = start_index; index <= end_index; index++) {
+  for (let index = startIndex; index <= endIndex; index++) {
     const item = items[index];
     const collectionState: CollectionState = {
-      collection_name,
-      current_index: index,
-      current_item: item,
-      start_index: start_index,
-      end_index: end_index,
-      total_items: total_items,
-      remaining_items: total_items - (index + 1),
+      collectionName,
+      currentIndex: index,
+      currentItem: item,
+      startIndex: startIndex,
+      endIndex: endIndex,
+      totalItems: totalItems,
+      remainingItems: totalItems - (index + 1),
     };
 
     const collectionsStateMap: CollectionsStateMap = {
       ...parentCollectionStateMap,
-      ...(collection_name && { [collection_name]: collectionState }),
+      ...(collectionName && { [collectionName]: collectionState }),
       [keyInnerCollectionState]: collectionState,
     };
 
-    if (index === start_index) {
+    if (index === startIndex) {
       // @ts-ignore
       const type = em.Components.getType(block?.type || 'default');
       const model = type.model;

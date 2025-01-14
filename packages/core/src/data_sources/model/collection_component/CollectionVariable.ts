@@ -63,36 +63,36 @@ function resolveCollectionVariable(
   collectionsStateMap: CollectionsStateMap,
   em: EditorModel,
 ) {
-  const { collection_name = keyInnerCollectionState, variable_type, path } = collectionVariableDefinition;
-  const collectionItem = collectionsStateMap[collection_name];
+  const { collectionName = keyInnerCollectionState, variableType, path } = collectionVariableDefinition;
+  const collectionItem = collectionsStateMap[collectionName];
 
   if (!collectionItem) {
-    em.logError(`Collection not found: ${collection_name}`);
+    em.logError(`Collection not found: ${collectionName}`);
     return '';
   }
 
-  if (!variable_type) {
-    em.logError(`Missing collection variable type for collection: ${collection_name}`);
+  if (!variableType) {
+    em.logError(`Missing collection variable type for collection: ${collectionName}`);
     return '';
   }
 
-  if (variable_type === 'current_item') {
-    return resolveCurrentItem(collectionItem, path, collection_name, em);
+  if (variableType === 'currentItem') {
+    return resolveCurrentItem(collectionItem, path, collectionName, em);
   }
 
-  return collectionItem[variable_type];
+  return collectionItem[variableType];
 }
 
 function resolveCurrentItem(
   collectionItem: CollectionState,
   path: string | undefined,
-  collection_name: string,
+  collectionName: string,
   em: EditorModel,
 ) {
-  const currentItem = collectionItem.current_item;
+  const currentItem = collectionItem.currentItem;
 
   if (!currentItem) {
-    em.logError(`Current item is missing for collection: ${collection_name}`);
+    em.logError(`Current item is missing for collection: ${collectionName}`);
     return '';
   }
 
@@ -105,7 +105,7 @@ function resolveCurrentItem(
   }
 
   if (path && !currentItem[path]) {
-    em.logError(`Path not found in current item: ${path} for collection: ${collection_name}`);
+    em.logError(`Path not found in current item: ${path} for collection: ${collectionName}`);
     return '';
   }
 

@@ -130,19 +130,19 @@ describe('Collection component', () => {
                   type: 'default',
                   content: {
                     type: CollectionVariableType,
-                    variable_type: CollectionStateVariableType.current_item,
+                    variableType: CollectionStateVariableType.currentItem,
                     path: 'user',
                   },
                 },
               ],
               content: {
                 type: CollectionVariableType,
-                variable_type: CollectionStateVariableType.current_item,
+                variableType: CollectionStateVariableType.currentItem,
                 path: 'user',
               },
               custom_property: {
                 type: CollectionVariableType,
-                variable_type: CollectionStateVariableType.current_item,
+                variableType: CollectionStateVariableType.currentItem,
                 path: 'user',
               },
             },
@@ -205,7 +205,7 @@ describe('Collection component', () => {
         firstChild.set('content', {
           // @ts-ignore
           type: CollectionVariableType,
-          variable_type: CollectionStateVariableType.current_item,
+          variableType: CollectionStateVariableType.currentItem,
           path: 'age',
         });
         expect(firstChild.get('content')).toBe('12');
@@ -223,7 +223,7 @@ describe('Collection component', () => {
         firstGrandchild.set('content', {
           // @ts-ignore
           type: CollectionVariableType,
-          variable_type: CollectionStateVariableType.current_item,
+          variableType: CollectionStateVariableType.currentItem,
           path: 'age',
         });
         expect(firstGrandchild.get('content')).toBe('new_value_12');
@@ -286,7 +286,7 @@ describe('Collection component', () => {
                   attributes: {
                     content: {
                       type: CollectionVariableType,
-                      variable_type: CollectionStateVariableType.current_item,
+                      variableType: CollectionStateVariableType.currentItem,
                       path: 'user',
                     },
                   },
@@ -295,7 +295,7 @@ describe('Collection component', () => {
               attributes: {
                 content: {
                   type: CollectionVariableType,
-                  variable_type: CollectionStateVariableType.current_item,
+                  variableType: CollectionStateVariableType.currentItem,
                   path: 'user',
                 },
               },
@@ -356,7 +356,7 @@ describe('Collection component', () => {
           content: {
             // @ts-ignore
             type: CollectionVariableType,
-            variable_type: CollectionStateVariableType.current_item,
+            variableType: CollectionStateVariableType.currentItem,
             path: 'age',
           },
         });
@@ -376,7 +376,7 @@ describe('Collection component', () => {
           content: {
             // @ts-ignore
             type: CollectionVariableType,
-            variable_type: CollectionStateVariableType.current_item,
+            variableType: CollectionStateVariableType.currentItem,
             path: 'age',
           },
         });
@@ -435,7 +435,7 @@ describe('Collection component', () => {
                 name: 'attribute_trait',
                 value: {
                   type: CollectionVariableType,
-                  variable_type: CollectionStateVariableType.current_item,
+                  variableType: CollectionStateVariableType.currentItem,
                   path: 'user',
                 },
               },
@@ -444,7 +444,7 @@ describe('Collection component', () => {
                 changeProp: true,
                 value: {
                   type: CollectionVariableType,
-                  variable_type: CollectionStateVariableType.current_item,
+                  variableType: CollectionStateVariableType.currentItem,
                   path: 'user',
                 },
               },
@@ -486,18 +486,18 @@ describe('Collection component', () => {
         type: 'default',
         content: {
           type: CollectionVariableType,
-          variable_type: CollectionStateVariableType.current_item,
+          variableType: CollectionStateVariableType.currentItem,
           path: 'user',
         },
         custom_prop: {
           type: CollectionVariableType,
-          variable_type: CollectionStateVariableType.current_index,
+          variableType: CollectionStateVariableType.currentIndex,
           path: 'user',
         },
         attributes: {
           content: {
             type: CollectionVariableType,
-            variable_type: CollectionStateVariableType.current_item,
+            variableType: CollectionStateVariableType.currentItem,
             path: 'user',
           },
         },
@@ -506,7 +506,7 @@ describe('Collection component', () => {
             name: 'attribute_trait',
             value: {
               type: CollectionVariableType,
-              variable_type: CollectionStateVariableType.current_item,
+              variableType: CollectionStateVariableType.currentItem,
               path: 'user',
             },
           },
@@ -515,7 +515,7 @@ describe('Collection component', () => {
             changeProp: true,
             value: {
               type: CollectionVariableType,
-              variable_type: CollectionStateVariableType.current_item,
+              variableType: CollectionStateVariableType.currentItem,
               path: 'user',
             },
           },
@@ -525,14 +525,14 @@ describe('Collection component', () => {
       const collectionComponentDefinition = {
         type: CollectionComponentType,
         collectionDefinition: {
-          collection_name: 'my_collection',
+          collectionName: 'my_collection',
           block: {
             ...cmpDefinition,
             components: [cmpDefinition, cmpDefinition],
           },
           config: {
-            start_index: 0,
-            end_index: 1,
+            startIndex: 0,
+            endIndex: 1,
             dataSource: {
               type: DataVariableType,
               path: 'my_data_source_id',
@@ -552,7 +552,7 @@ describe('Collection component', () => {
         type: 'default',
         content: {
           type: CollectionVariableType,
-          variable_type: CollectionStateVariableType.current_index,
+          variableType: CollectionStateVariableType.currentIndex,
           path: 'user',
         },
       };
@@ -573,7 +573,7 @@ describe('Collection component', () => {
         type: 'default',
         content: {
           type: CollectionVariableType,
-          variable_type: CollectionStateVariableType.current_index,
+          variableType: CollectionStateVariableType.currentIndex,
           path: 'user',
         },
       };
@@ -597,12 +597,12 @@ describe('Collection component', () => {
                             attribute_trait: {
                               path: 'user',
                               type: CollectionVariableType,
-                              variable_type: CollectionStateVariableType.current_item,
+                              variableType: CollectionStateVariableType.currentItem,
                             },
                             content: {
                               path: 'user',
                               type: CollectionVariableType,
-                              variable_type: CollectionStateVariableType.current_item,
+                              variableType: CollectionStateVariableType.currentItem,
                             },
                           },
                           components: [
@@ -611,28 +611,28 @@ describe('Collection component', () => {
                                 attribute_trait: {
                                   path: 'user',
                                   type: CollectionVariableType,
-                                  variable_type: CollectionStateVariableType.current_item,
+                                  variableType: CollectionStateVariableType.currentItem,
                                 },
                                 content: {
                                   path: 'user',
                                   type: CollectionVariableType,
-                                  variable_type: CollectionStateVariableType.current_item,
+                                  variableType: CollectionStateVariableType.currentItem,
                                 },
                               },
                               content: {
                                 path: 'user',
                                 type: CollectionVariableType,
-                                variable_type: CollectionStateVariableType.current_item,
+                                variableType: CollectionStateVariableType.currentItem,
                               },
                               custom_prop: {
                                 path: 'user',
                                 type: CollectionVariableType,
-                                variable_type: 'current_index',
+                                variableType: 'currentIndex',
                               },
                               property_trait: {
                                 path: 'user',
                                 type: CollectionVariableType,
-                                variable_type: CollectionStateVariableType.current_item,
+                                variableType: CollectionStateVariableType.currentItem,
                               },
                               type: 'default',
                             },
@@ -641,28 +641,28 @@ describe('Collection component', () => {
                                 attribute_trait: {
                                   path: 'user',
                                   type: CollectionVariableType,
-                                  variable_type: CollectionStateVariableType.current_item,
+                                  variableType: CollectionStateVariableType.currentItem,
                                 },
                                 content: {
                                   path: 'user',
                                   type: CollectionVariableType,
-                                  variable_type: CollectionStateVariableType.current_item,
+                                  variableType: CollectionStateVariableType.currentItem,
                                 },
                               },
                               content: {
                                 path: 'user',
                                 type: CollectionVariableType,
-                                variable_type: CollectionStateVariableType.current_item,
+                                variableType: CollectionStateVariableType.currentItem,
                               },
                               custom_prop: {
                                 path: 'user',
                                 type: CollectionVariableType,
-                                variable_type: 'current_index',
+                                variableType: 'currentIndex',
                               },
                               property_trait: {
                                 path: 'user',
                                 type: CollectionVariableType,
-                                variable_type: CollectionStateVariableType.current_item,
+                                variableType: CollectionStateVariableType.currentItem,
                               },
                               type: 'default',
                             },
@@ -670,28 +670,28 @@ describe('Collection component', () => {
                           content: {
                             path: 'user',
                             type: CollectionVariableType,
-                            variable_type: CollectionStateVariableType.current_item,
+                            variableType: CollectionStateVariableType.currentItem,
                           },
                           custom_prop: {
                             path: 'user',
                             type: CollectionVariableType,
-                            variable_type: 'current_index',
+                            variableType: 'currentIndex',
                           },
                           property_trait: {
                             path: 'user',
                             type: CollectionVariableType,
-                            variable_type: CollectionStateVariableType.current_item,
+                            variableType: CollectionStateVariableType.currentItem,
                           },
                           type: 'default',
                         },
-                        collection_name: 'my_collection',
+                        collectionName: 'my_collection',
                         config: {
                           dataSource: {
                             path: 'my_data_source_id',
                             type: DataVariableType,
                           },
-                          end_index: 1,
-                          start_index: 0,
+                          endIndex: 1,
+                          startIndex: 0,
                         },
                       },
                       type: 'collection-component',
@@ -766,13 +766,13 @@ describe('Collection component', () => {
             type: 'default',
             content: {
               type: CollectionVariableType,
-              variable_type: CollectionStateVariableType.current_item,
+              variableType: CollectionStateVariableType.currentItem,
               path: 'user',
             },
           },
           config: {
-            start_index: 1,
-            end_index: 2,
+            startIndex: 1,
+            endIndex: 2,
             dataSource: {
               type: DataVariableType,
               path: 'my_data_source_id',
@@ -792,15 +792,15 @@ describe('Collection component', () => {
 
   describe('Diffirent Collection variable types', () => {
     const stateVariableTests = [
-      { variableType: CollectionStateVariableType.current_index, expectedValues: [0, 1, 2] },
-      { variableType: CollectionStateVariableType.start_index, expectedValues: [0, 0, 0] },
-      { variableType: CollectionStateVariableType.end_index, expectedValues: [2, 2, 2] },
+      { variableType: CollectionStateVariableType.currentIndex, expectedValues: [0, 1, 2] },
+      { variableType: CollectionStateVariableType.startIndex, expectedValues: [0, 0, 0] },
+      { variableType: CollectionStateVariableType.endIndex, expectedValues: [2, 2, 2] },
       {
-        variableType: CollectionStateVariableType.collection_name,
+        variableType: CollectionStateVariableType.collectionName,
         expectedValues: ['my_collection', 'my_collection', 'my_collection'],
       },
-      { variableType: CollectionStateVariableType.total_items, expectedValues: [3, 3, 3] },
-      { variableType: CollectionStateVariableType.remaining_items, expectedValues: [2, 1, 0] },
+      { variableType: CollectionStateVariableType.totalItems, expectedValues: [3, 3, 3] },
+      { variableType: CollectionStateVariableType.remainingItems, expectedValues: [2, 1, 0] },
     ];
 
     stateVariableTests.forEach(({ variableType, expectedValues }) => {
@@ -808,17 +808,17 @@ describe('Collection component', () => {
         const cmp = wrapper.components({
           type: CollectionComponentType,
           collectionDefinition: {
-            collection_name: 'my_collection',
+            collectionName: 'my_collection',
             block: {
               type: 'default',
               content: {
                 type: CollectionVariableType,
-                variable_type: variableType,
+                variableType: variableType,
               },
               attributes: {
                 custom_attribute: {
                   type: CollectionVariableType,
-                  variable_type: variableType,
+                  variableType: variableType,
                 },
               },
               traits: [
@@ -826,7 +826,7 @@ describe('Collection component', () => {
                   name: 'attribute_trait',
                   value: {
                     type: CollectionVariableType,
-                    variable_type: variableType,
+                    variableType: variableType,
                   },
                 },
                 {
@@ -834,7 +834,7 @@ describe('Collection component', () => {
                   changeProp: true,
                   value: {
                     type: CollectionVariableType,
-                    variable_type: variableType,
+                    variableType: variableType,
                   },
                 },
               ],
