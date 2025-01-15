@@ -355,7 +355,4 @@ export interface ComponentOptions {
   frame?: Frame;
   temporary?: boolean;
   avoidChildren?: boolean;
-  collectionsStateMap?: CollectionsStateMap;
-  isCollectionItem?: boolean;
-  parent?: Component;
 }

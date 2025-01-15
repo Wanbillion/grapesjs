@@ -55,6 +55,7 @@ import {
 } from './SymbolUtils';
 import { ComponentDynamicValueWatcher } from './ComponentDynamicValueWatcher';
 import { DynamicWatchersOptions } from './DynamicValueWatcher';
+import { keyIsCollectionItem } from '../../data_sources/model/collection_component/constants';
 
 export interface IComponent extends ExtractMethods<Component> {}
 export interface SetAttrOptions extends SetOptions, UpdateStyleOptions, DynamicWatchersOptions {}
@@ -73,7 +74,6 @@ export const keySymbolOvrd = '__symbol_ovrd';
 export const keyUpdate = ComponentsEvents.update;
 export const keyUpdateInside = ComponentsEvents.updateInside;
 export const keyCollectionsStateMap = '__collections_state_map';
-export const keyIsCollectionItem = '__is_collection_item';
 
 /**
  * The Component object represents a single node of our template structure, so when you update its properties the changes are
@@ -265,7 +265,6 @@ export default class Component extends StyleableModel<ComponentProperties> {
    * @ts-ignore */
   collection!: Components;
   componentDVListener: ComponentDynamicValueWatcher;
-  initialParent?: Component;
   accumulatedPropagatedProps: DeepPropagationArray = [];
 
   constructor(props: ComponentProperties = {}, opt: ComponentOptions) {
@@ -356,7 +355,7 @@ export default class Component extends StyleableModel<ComponentProperties> {
       return collectionStateMapProp;
     }
 
-    const parent = this.parent() || this.opt.parent;
+    const parent = this.parent();
     return parent?.getCollectionStateMap() || {};
   }
 
@@ -1144,7 +1143,6 @@ export default class Component extends StyleableModel<ComponentProperties> {
    * // -> Component
    */
   parent(opts: any = {}): Component | undefined {
-    if (!this.collection && this.initialParent) return this.initialParent;
     const coll = this.collection || (opts.prev && this.prevColl);
     return coll ? coll.parent : undefined;
   }
@@ -1632,12 +1630,12 @@ export default class Component extends StyleableModel<ComponentProperties> {
     delete obj.open; // used in Layers
     delete obj._undoexc;
     delete obj.delegate;
-    if (this.get('isCollectionItem')) {
+    if (this.get(keyIsCollectionItem)) {
       delete obj[keySymbol];
       delete obj[keySymbolOvrd];
       delete obj[keySymbols];
       delete obj[keyCollectionsStateMap];
-      delete obj['isCollectionItem'];
+      delete obj[keyIsCollectionItem];
       delete obj.attributes.id;
       obj['components'] = this.components()
         .toArray()

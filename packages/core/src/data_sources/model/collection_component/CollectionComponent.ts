@@ -8,7 +8,12 @@ import { ObjectAny } from '../../../common';
 import EditorModel from '../../../editor/model/Editor';
 import { keyCollectionsStateMap } from '../../../dom_components/model/Component';
 import { CollectionComponentDefinition, CollectionDefinition, CollectionState, CollectionsStateMap } from './types';
-import { keyCollectionDefinition, keyInnerCollectionState, CollectionComponentType } from './constants';
+import {
+  keyCollectionDefinition,
+  keyInnerCollectionState,
+  CollectionComponentType,
+  keyIsCollectionItem,
+} from './constants';
 import DynamicVariableListenerManager from '../DataVariableListenerManager';
 
 export default class CollectionComponent extends Component {
@@ -148,7 +153,7 @@ function getCollectionItems(
         {
           ...block,
           [keyCollectionsStateMap]: collectionsStateMap,
-          isCollectionItem: true,
+          [keyIsCollectionItem]: true,
           draggable: false,
           deepPropagate: [setCollectionStateMap(collectionsStateMap)],
         },
@@ -167,7 +172,7 @@ function getCollectionItems(
 
 function setCollectionStateMap(collectionsStateMap: CollectionsStateMap) {
   return (cmp: Component) => {
-    cmp.set('isCollectionItem', true);
+    cmp.set(keyIsCollectionItem, true);
     cmp.set(keyCollectionsStateMap, collectionsStateMap);
   };
 }
