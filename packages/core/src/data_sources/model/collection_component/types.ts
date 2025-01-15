@@ -4,12 +4,13 @@ import { ComponentDefinition } from '../../../dom_components/model/types';
 import { CollectionVariableDefinition } from '../../../../test/specs/dom_components/model/ComponentTypes';
 import { DataVariableDefinition } from '../DataVariable';
 
-type CollectionDataSource = any[] | DataVariableDefinition | CollectionVariableDefinition;
-type CollectionConfig = {
+export type CollectionDataSource = any[] | DataVariableDefinition | CollectionVariableDefinition;
+
+export interface CollectionConfig {
   startIndex?: number;
   endIndex?: number;
   dataSource: CollectionDataSource;
-};
+}
 
 export enum CollectionStateVariableType {
   currentIndex = 'currentIndex',
@@ -21,7 +22,7 @@ export enum CollectionStateVariableType {
   remainingItems = 'remainingItems',
 }
 
-export type CollectionState = {
+export interface CollectionState {
   [CollectionStateVariableType.currentIndex]: number;
   [CollectionStateVariableType.startIndex]: number;
   [CollectionStateVariableType.currentItem]: any;
@@ -29,19 +30,19 @@ export type CollectionState = {
   [CollectionStateVariableType.collectionName]?: string;
   [CollectionStateVariableType.totalItems]: number;
   [CollectionStateVariableType.remainingItems]: number;
-};
+}
 
-export type CollectionsStateMap = {
+export interface CollectionsStateMap {
   [key: string]: CollectionState;
-};
+}
 
-export type CollectionComponentDefinition = {
+export interface CollectionComponentDefinition extends ComponentDefinition {
   [keyCollectionDefinition]: CollectionDefinition;
-} & ComponentDefinition;
+}
 
-export type CollectionDefinition = {
+export interface CollectionDefinition {
   type: typeof CollectionComponentType;
   collectionName?: string;
   config: CollectionConfig;
   block: ComponentDefinition;
-};
+}

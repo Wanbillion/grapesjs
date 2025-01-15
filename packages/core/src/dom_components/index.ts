@@ -130,7 +130,7 @@ import ComponentConditionalVariable from '../data_sources/model/conditional_vari
 import ConditionalComponentView from '../data_sources/view/ComponentDynamicView';
 import CollectionComponent from '../data_sources/model/collection_component/CollectionComponent';
 import CollectionComponentView from '../data_sources/model/collection_component/CollectionComponentView';
-import { CollectionComponentType } from "../data_sources/model/collection_component/constants";
+import { CollectionComponentType } from '../data_sources/model/collection_component/constants';
 
 export type ComponentEvent =
   | 'component:create'
