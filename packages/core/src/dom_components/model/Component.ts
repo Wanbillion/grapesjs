@@ -1708,7 +1708,7 @@ export default class Component extends StyleableModel<ComponentProperties> {
    * @return {this}
    */
   setId(id: string, opts?: SetOptions & { idUpdate?: boolean }) {
-    this.addAttributes({ id });
+    this.addAttributes({ id }, opts );
     return this;
   }
 
