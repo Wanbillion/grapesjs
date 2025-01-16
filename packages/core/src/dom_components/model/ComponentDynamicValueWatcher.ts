@@ -50,14 +50,23 @@ export class ComponentDynamicValueWatcher extends Model<Component> {
   }
 
   addProps(props: ObjectAny, options: DynamicWatchersOptions = {}) {
-    const evaluatedProps = this.propertyWatcher.addDynamicValues(props, options);
+    const excludedFromEvaluation = ['components'];
+
+    const evaluatedProps = Object.fromEntries(
+      Object.entries(props).map(([key, value]) =>
+        excludedFromEvaluation.includes(key)
+          ? [key, value] // Return excluded keys as they are
+          : [key, this.propertyWatcher.addDynamicValues({ [key]: value }, options)[key]]
+      )
+    );
+
     if (props.attributes) {
       const evaluatedAttributes = this.attributeWatcher.setDynamicValues(props.attributes, options);
       evaluatedProps['attributes'] = evaluatedAttributes;
     }
 
-    const skipOverridUpdates = options.skipWatcherUpdates || options.fromDataSource;
-    if (!skipOverridUpdates) {
+    const skipOverrideUpdates = options.skipWatcherUpdates || options.fromDataSource;
+    if (!skipOverrideUpdates) {
       this.updateSymbolOverride();
     }
 
