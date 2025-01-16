@@ -105,7 +105,7 @@ describe('Collection variable components', () => {
         type: CollectionVariableType,
         variableType: DataCollectionStateVariableType.currentItem,
         path: 'user',
-      }
+      };
 
       const collectionComponentDefinition = {
         type: CollectionComponentType,
