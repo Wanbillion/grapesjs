@@ -30,7 +30,7 @@
     "url": "https://github.com/GrapesJS/grapesjs.git"
   },
   "dependencies": {
-    "@types/backbone": "1.4.15",
+    "@types/backbone": "1.4.22",
     "backbone": "1.4.1",
     "backbone-undo": "0.2.6",
     "codemirror": "5.63.0",
